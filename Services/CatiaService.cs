@@ -1,53 +1,55 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using INFITF;
+﻿using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Security;
 
 namespace CATIAAssistant.Services
 {
     public class CatiaService
     {
-        public INFITF.Application CatiaApplication { get; private set; }
+        internal const String OLEAUT32 = "oleaut32.dll";
+        internal const String OLE32 = "ole32.dll";
 
-        // CLSIDFromProgID fonksiyonunu tanımlıyoruz.
-        [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
-        private static extern int CLSIDFromProgID(
-            [MarshalAs(UnmanagedType.LPWStr)] string lpszProgID,
-            out Guid pclsid);
-
-        // GetActiveObject fonksiyonunu P/Invoke ile tanımlıyoruz.
-        [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
-        private static extern int GetActiveObject(
-            [In] ref Guid rclsid,
-            IntPtr reserved,
-            out IntPtr ppunk);
-
-        public bool Connect()
+        [System.Security.SecurityCritical]  // auto-generated_required
+        public Object GetActiveObject(String progID)
         {
+            Object obj = null;
+            Guid clsid;
+
+            // Call CLSIDFromProgIDEx first then fall back on CLSIDFromProgID if
+            // CLSIDFromProgIDEx doesn't exist.
             try
             {
-                // CATIA'nın ProgID'sini kullanarak CLSID'i alıyoruz.
-                Guid clsid;
-                int hr = CLSIDFromProgID("CATIA.Application", out clsid);
-                if (hr != 0)
-                    throw new Exception("CLSIDFromProgID failed with HR: " + hr);
-
-                // Aktif nesneyi almaya çalışıyoruz.
-                IntPtr pUnk;
-                hr = GetActiveObject(ref clsid, IntPtr.Zero, out pUnk);
-                if (hr != 0)
-                    throw new Exception("GetActiveObject failed with HR: " + hr);
-
-                // COM nesnesini managed nesneye dönüştürüyoruz.
-                object obj = Marshal.GetObjectForIUnknown(pUnk);
-                Marshal.Release(pUnk);
-
-                CatiaApplication = (INFITF.Application)obj;
-                return true;
+                CLSIDFromProgIDEx(progID, out clsid);
             }
+            //            catch
             catch (Exception)
             {
-                return false;
+                CLSIDFromProgID(progID, out clsid);
             }
+
+            GetActiveObject(ref clsid, IntPtr.Zero, out obj);
+            return obj;
         }
+
+        //[DllImport(Microsoft.Win32.Win32Native.OLE32, PreserveSig = false)]
+        [DllImport(OLE32, PreserveSig = false)]
+        [ResourceExposure(ResourceScope.None)]
+        [SuppressUnmanagedCodeSecurity]
+        [System.Security.SecurityCritical]  // auto-generated
+        private static extern void CLSIDFromProgIDEx([MarshalAs(UnmanagedType.LPWStr)] String progId, out Guid clsid);
+
+        //[DllImport(Microsoft.Win32.Win32Native.OLE32, PreserveSig = false)]
+        [DllImport(OLE32, PreserveSig = false)]
+        [ResourceExposure(ResourceScope.None)]
+        [SuppressUnmanagedCodeSecurity]
+        [System.Security.SecurityCritical]  // auto-generated
+        private static extern void CLSIDFromProgID([MarshalAs(UnmanagedType.LPWStr)] String progId, out Guid clsid);
+
+        //[DllImport(Microsoft.Win32.Win32Native.OLEAUT32, PreserveSig = false)]
+        [DllImport(OLEAUT32, PreserveSig = false)]
+        [ResourceExposure(ResourceScope.None)]
+        [SuppressUnmanagedCodeSecurity]
+        [System.Security.SecurityCritical]  // auto-generated
+        private static extern void GetActiveObject(ref Guid rclsid, IntPtr reserved, [MarshalAs(UnmanagedType.Interface)] out Object ppunk);
     }
 }

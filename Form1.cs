@@ -41,13 +41,17 @@ namespace CATIAAssistant
 
             // Catia baðlantýsý
             var catiaService = new CatiaService();
-            if (!catiaService.Connect())
+            try
+            {
+                _catia = (INFITF.Application)catiaService.GetActiveObject("CATIA.Application");
+
+            }
+            catch (Exception)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = "CATIA application cannot be found";
                 return;
             }
-            _catia = catiaService.CatiaApplication;
 
             // Yeni bir CatiaDocumentHelper oluþturuyoruz.
             var docHelper = new CatiaDocumentHelper(_catia);
@@ -168,6 +172,5 @@ namespace CATIAAssistant
         }
 
         #endregion
-
     }
 }

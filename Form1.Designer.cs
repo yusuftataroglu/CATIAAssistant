@@ -156,6 +156,7 @@
             dataGridView1.RowHeadersWidth = 51;
             dataGridView1.Size = new Size(529, 303);
             dataGridView1.TabIndex = 0;
+            dataGridView1.Sorted += dataGridView1_Sorted;
             // 
             // Form1
             // 
@@ -169,6 +170,7 @@
             SizeGripStyle = SizeGripStyle.Show;
             Text = "Form1";
             TopMost = true;
+            Load += Form1_Load;
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             statusStrip2.ResumeLayout(false);
