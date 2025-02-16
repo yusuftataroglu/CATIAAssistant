@@ -4,7 +4,7 @@ using System.Security;
 
 namespace CATIAAssistant.Services
 {
-    public class CatiaService
+    public class COMService
     {
         internal const String OLEAUT32 = "oleaut32.dll";
         internal const String OLE32 = "ole32.dll";

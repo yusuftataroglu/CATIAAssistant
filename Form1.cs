@@ -1,8 +1,7 @@
+using Catia_Macro_Test.Services;
 using CATIAAssistant.Helpers;
 using CATIAAssistant.Services;
-using DRAFTINGITF;
-using MECMOD;
-using System.Configuration;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CATIAAssistant
 {
@@ -28,8 +27,12 @@ namespace CATIAAssistant
             TopMost = true;
             InformationLabel.Text = "";
             // Sabit metin: "Active document:" kýsmý her zaman görünür
-            ActiveDocumentPrefixLabel.Text = "Active document:";
+            ActiveDocumentPrefixLabel.Text = "Active Catia Doc:";
             ActiveDocumentLabel.Text = "";
+            // Sabit metin: "Active excel:" kýsmý her zaman görünür
+            ActiveExcelPrefixLabel.Text = "Active Excel Doc:";
+            ActiveExcelLabel.Text = "";
+
         }
 
         #endregion
@@ -43,10 +46,10 @@ namespace CATIAAssistant
             InformationLabel.Text = "";
 
             // Catia baðlantýsý
-            var catiaService = new CatiaService();
+            var comService = new COMService();
             try
             {
-                _catia = (INFITF.Application)catiaService.GetActiveObject("CATIA.Application");
+                _catia = (INFITF.Application)comService.GetActiveObject("CATIA.Application");
 
             }
             catch (Exception)
@@ -70,7 +73,7 @@ namespace CATIAAssistant
             // Doküman adýný siyah renkle ekliyoruz.
             _activeDoc = docHelper.GetActiveDocument();
             ActiveDocumentLabel.ForeColor = Color.Black;
-            ActiveDocumentLabel.Text = $" {_activeDoc.FullName}";
+            ActiveDocumentLabel.Text = $"{_activeDoc.get_Name()}";
 
             // Doküman türünü alýyoruz.
             _docType = docHelper.GetDocumentType(_activeDoc);
@@ -188,5 +191,39 @@ namespace CATIAAssistant
         }
 
         #endregion
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            InformationLabel.Text = "";
+            ActiveExcelLabel.ForeColor = Color.Black;
+
+            if (!_validationHelper.ValidateDrawingDocument(_docType))
+            {
+                InformationLabel.Text = "Type of this document is not \"Drawing\"";
+                dataGridView1.Rows.Clear();
+                return;
+            }
+
+            // Excel BOM dosya yolu
+            string excelPath = _drawingDoc?.FullName?.Split('.')[0] + ".xlsx";
+
+            using (var excelService = new ExcelService())
+            {
+                if (!excelService.OpenWorkbook(excelPath))
+                {
+                    ActiveExcelLabel.ForeColor = Color.Red;
+                    ActiveExcelLabel.Text = "Excel document cannot be found";
+                    return;
+                }
+
+                ActiveExcelLabel.Text = $"{excelService.Workbook.Name}";
+
+                Excel.Range usedRange = excelService.GetUsedRange();
+                // Örneðin: satýr 14'ten 100'e kadar kontrol edelim.
+                excelService.ProcessUsedRange(usedRange, 14, 100);
+            }
+        }
+
     }
 }
+
