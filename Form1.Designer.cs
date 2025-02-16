@@ -153,7 +153,7 @@
             dataGridView1.Location = new Point(3, 6);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
-            dataGridView1.RowHeadersWidth = 51;
+            dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToFirstHeader;
             dataGridView1.Size = new Size(529, 303);
             dataGridView1.TabIndex = 0;
             dataGridView1.Sorted += dataGridView1_Sorted;
