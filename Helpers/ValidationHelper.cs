@@ -40,6 +40,20 @@ namespace CATIAAssistant.Helpers
         }
 
         /// <summary>
+        /// Aktif sheet'in aktif view içerip içermediğini kontrol eder.
+        /// </summary>
+        /// <returns>Geçerliyse true, aksi halde false döner.</returns>
+        public bool ValidateActiveView(DrawingDocument drawingDocument)
+        {
+            DrawingView activeView = drawingDocument.Sheets.ActiveSheet.Views.ActiveView;
+            if (activeView.get_Name() == "Main View" || activeView.get_Name() == "Background View")
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Aktif view'ın component içerip içermediğini kontrol eder.
         /// </summary>
         /// <returns>Geçerliyse true, aksi halde false döner.</returns>
@@ -48,6 +62,19 @@ namespace CATIAAssistant.Helpers
             if (drawingDocument.Sheets.ActiveSheet.Views.ActiveView.Components.Count == 0)
             {
 
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Aktif sheet'in detail sheet olup olmadığını kontrol eder.
+        /// </summary>
+        /// <returns>Geçerliyse true, aksi halde false döner.</returns>
+        public bool ValidateDetailSheet(DrawingDocument drawingDocument)
+        {
+            if (drawingDocument.Sheets.ActiveSheet.IsDetail())
+            {
                 return false;
             }
             return true;

@@ -1,5 +1,8 @@
 using CATIAAssistant.Helpers;
 using CATIAAssistant.Services;
+using DRAFTINGITF;
+using MECMOD;
+using System.Configuration;
 
 namespace CATIAAssistant
 {
@@ -60,7 +63,7 @@ namespace CATIAAssistant
             if (docHelper.GetDocumentsCount() == 0)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "Document cannot be found";
+                ActiveDocumentLabel.Text = "No document found";
                 return;
             }
 
@@ -113,7 +116,20 @@ namespace CATIAAssistant
                 return;
             }
 
+            if (!_validationHelper.ValidateDetailSheet(_drawingDoc))
+            {
+                InformationLabel.Text = "Can not read component datas in detail sheet";
+                dataGridView1.Rows.Clear();
+                return;
+            }
+
             if (!_validationHelper.ValidateActiveSheetViewsCount(_drawingDoc))
+            {
+                InformationLabel.Text = "No view found in this sheet";
+                dataGridView1.Rows.Clear();
+                return;
+            }
+            if (!_validationHelper.ValidateActiveView(_drawingDoc))
             {
                 InformationLabel.Text = "No active view found in this sheet";
                 dataGridView1.Rows.Clear();
