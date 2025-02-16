@@ -1,5 +1,6 @@
 using Catia_Macro_Test.Services;
 using CATIAAssistant.Helpers;
+using CATIAAssistant.Models;
 using CATIAAssistant.Services;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -165,33 +166,48 @@ namespace CATIAAssistant
                 dataGridView1.Rows.Add(row);
             }
             SetRowNumber(dataGridView1);
-        }
-        #endregion
-        #region DataGridView Row Numbering
 
-        private void dataGridView1_Sorted(object sender, EventArgs e)
-        {
-            SetRowNumber(dataGridView1);
-        }
+            var catiaComponents = new List<ComponentItem>();
+            var parseQuantityHelper = new ParseQuantityHelper();
 
-        private void SetRowNumber(DataGridView dgv)
-        {
-            foreach (DataGridViewRow row in dgv.Rows)
+            foreach (DataGridViewRow row in dataGridView1.Rows)
             {
-                row.HeaderCell.Value = (row.Index + 1).ToString();
+                // 0. hücrede ItemNo, 1. hücrede "2x/3x" gibi bir metin varsayýyoruz
+                if (row.Cells[0].Value != null && row.Cells[1].Value != null)
+                {
+                    string itemNo = row.Cells[0].Value.ToString();
+                    string quantityText = row.Cells[1].Value.ToString(); // Örneðin "2x/3x"
+
+                    // Slash üzerinden parçalama
+                    // "2x/3x" => ["2x", "3x"]
+                    string[] parts = quantityText.Split('/');
+
+                    int quantityDrawn = 0;
+                    int quantityMirror = 0;
+
+                    // parts[0] = "2x" => quantityDrawn
+                    if (parts.Length > 0)
+                    {
+                        quantityDrawn = parseQuantityHelper.ParseQuantity(parts[0]);
+                    }
+
+                    // parts[1] = "3x" => quantityMirror
+                    if (parts.Length > 1)
+                    {
+                        quantityMirror = parseQuantityHelper.ParseQuantity(parts[1]);
+                    }
+
+                    catiaComponents.Add(new ComponentItem
+                    {
+                        ItemNo = itemNo,
+                        QuantityDrawn = quantityDrawn,
+                        QuantityMirror = quantityMirror
+                    });
+                }
             }
         }
-
         #endregion
-        #region Other UI Handlers
-
-        private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)
-        {
-            this.TopMost = checkBoxAlwaysOnTop.Checked;
-        }
-
-        #endregion
-
+        #region Button3 Click Handlers
         private void button3_Click(object sender, EventArgs e)
         {
             InformationLabel.Text = "";
@@ -223,7 +239,31 @@ namespace CATIAAssistant
                 excelService.ProcessUsedRange(usedRange, 14, 100);
             }
         }
+        #endregion
+        #region DataGridView Row Numbering
 
+        private void dataGridView1_Sorted(object sender, EventArgs e)
+        {
+            SetRowNumber(dataGridView1);
+        }
+
+        private void SetRowNumber(DataGridView dgv)
+        {
+            foreach (DataGridViewRow row in dgv.Rows)
+            {
+                row.HeaderCell.Value = (row.Index + 1).ToString();
+            }
+        }
+
+        #endregion
+        #region Other UI Handlers
+
+        private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)
+        {
+            this.TopMost = checkBoxAlwaysOnTop.Checked;
+        }
+
+        #endregion
     }
 }
 

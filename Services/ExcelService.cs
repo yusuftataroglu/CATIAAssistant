@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using CATIAAssistant.Models;
+using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Catia_Macro_Test.Services
@@ -17,7 +18,7 @@ namespace Catia_Macro_Test.Services
         /// <summary>
         /// Belirtilen yoldaki Excel dosyasını açar.
         /// </summary>
-        public bool OpenWorkbook(string path, bool visible = true)
+        public bool OpenWorkbook(string path, bool visible = false)
         {
             try
             {
@@ -39,6 +40,53 @@ namespace Catia_Macro_Test.Services
         {
             return Worksheet.UsedRange;
         }
+        public void ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow)
+        {
+            int rowCount = usedRange.Rows.Count;
+            int colCount = usedRange.Columns.Count;
+            var bomItems = new List<BomItem>();
+            for (int row = startRow; row <= endRow && row <= rowCount; row++)
+            {
+                bool isRowEmpty = true;
+                for (int col = 1; col <= colCount; col++)
+                {
+                    Excel.Range cell = usedRange.Cells[row, col] as Excel.Range;
+                    if (cell != null && cell.Value2 != null && !string.IsNullOrWhiteSpace(cell.Value2.ToString()))
+                    {
+                        isRowEmpty = false;
+                        break;
+                    }
+                }
+
+                if (!isRowEmpty)
+                {
+                    // Bu satır dolu, veri çekilecek.
+                    int itemNo;
+                    if (!int.TryParse((usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString(), out itemNo))
+                        itemNo = 0;
+
+                    int indexVal;
+                    if (!int.TryParse((usedRange.Cells[row, 2] as Excel.Range)?.Value2?.ToString(), out indexVal))
+                        indexVal = 0;
+
+                    int drawn;
+                    if (!int.TryParse((usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString(), out drawn))
+                        drawn = 0;
+
+                    int mirror;
+                    if (!int.TryParse((usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString(), out mirror))
+                        mirror = 0;
+
+                    bomItems.Add(new BomItem
+                    {
+                        ItemNo = itemNo,
+                        Index = indexVal,
+                        Drawn = drawn,
+                        Mirror = mirror
+                    });
+                }
+            }
+        }
 
         public void Quit()
         {
@@ -58,31 +106,6 @@ namespace Catia_Macro_Test.Services
             Quit();
         }
 
-        public void ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow)
-        {
-            int rowCount = usedRange.Rows.Count;
-            int colCount = usedRange.Columns.Count;
-
-            for (int row = startRow; row <= endRow && row <= rowCount; row++)
-            {
-                bool isRowEmpty = true;
-                for (int col = 1; col <= colCount; col++)
-                {
-                    Excel.Range cell = usedRange.Cells[row, col] as Excel.Range;
-                    if (cell != null && cell.Value2 != null && !string.IsNullOrWhiteSpace(cell.Value2.ToString()))
-                    {
-                        isRowEmpty = false;
-                        break;
-                    }
-                }
-
-                if (!isRowEmpty)
-                {
-                    // Bu satır dolu, veriyi işleyin.
-                    // Örneğin, veriyi koleksiyona ekleyin veya doğrudan DataGridView'e aktarın.
-                }
-            }
-        }
 
     }
 }
