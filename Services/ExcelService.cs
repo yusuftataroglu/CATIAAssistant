@@ -1,4 +1,5 @@
-﻿using CATIAAssistant.Models;
+﻿using CATIAAssistant.Helpers;
+using CATIAAssistant.Models;
 using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -40,7 +41,7 @@ namespace Catia_Macro_Test.Services
         {
             return Worksheet.UsedRange;
         }
-        public void ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow)
+        public List<BomItem> ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow)
         {
             int rowCount = usedRange.Rows.Count;
             int colCount = usedRange.Columns.Count;
@@ -81,12 +82,14 @@ namespace Catia_Macro_Test.Services
                     {
                         ItemNo = itemNo,
                         Index = indexVal,
-                        Drawn = drawn,
-                        Mirror = mirror
+                        QuantityDrawn = drawn,
+                        QuantityMirror = mirror
                     });
                 }
             }
+            return bomItems;
         }
+        
 
         public void Quit()
         {

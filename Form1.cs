@@ -15,6 +15,8 @@ namespace CATIAAssistant
         private MECMOD.PartDocument _partDoc;
         private DRAFTINGITF.DrawingDocument _drawingDoc;
         private readonly ValidationHelper _validationHelper;
+        private List<ComponentItem> _catiaComponents = new List<ComponentItem>();
+
         public Form1(ValidationHelper validationHelper)
         {
             InitializeComponent();
@@ -167,9 +169,9 @@ namespace CATIAAssistant
             }
             SetRowNumber(dataGridView1);
 
-            var catiaComponents = new List<ComponentItem>();
             var parseQuantityHelper = new ParseQuantityHelper();
 
+            _catiaComponents.Clear();
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 // 0. hücrede ItemNo, 1. hücrede "2x/3x" gibi bir metin varsayýyoruz
@@ -197,9 +199,9 @@ namespace CATIAAssistant
                         quantityMirror = parseQuantityHelper.ParseQuantity(parts[1]);
                     }
 
-                    catiaComponents.Add(new ComponentItem
+                    _catiaComponents.Add(new ComponentItem
                     {
-                        ItemNo = itemNo,
+                        ItemNo = int.Parse(itemNo),// todo hata verebilir.
                         QuantityDrawn = quantityDrawn,
                         QuantityMirror = quantityMirror
                     });
@@ -222,7 +224,7 @@ namespace CATIAAssistant
 
             // Excel BOM dosya yolu
             string excelPath = _drawingDoc?.FullName?.Split('.')[0] + ".xlsx";
-
+            ComparisonHelper comparisonHelper = new();
             using (var excelService = new ExcelService())
             {
                 if (!excelService.OpenWorkbook(excelPath))
@@ -236,7 +238,9 @@ namespace CATIAAssistant
 
                 Excel.Range usedRange = excelService.GetUsedRange();
                 // Örneðin: satýr 14'ten 100'e kadar kontrol edelim.
-                excelService.ProcessUsedRange(usedRange, 14, 100);
+                var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
+                // Karþýlaþtýrma
+                comparisonHelper.CompareCatiaAndBom(_catiaComponents,bomItems);
             }
         }
         #endregion
