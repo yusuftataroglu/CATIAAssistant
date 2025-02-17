@@ -2,6 +2,9 @@ using Catia_Macro_Test.Services;
 using CATIAAssistant.Helpers;
 using CATIAAssistant.Models;
 using CATIAAssistant.Services;
+using DRAFTINGITF;
+using INFITF;
+using Microsoft.VisualBasic;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CATIAAssistant
@@ -147,18 +150,18 @@ namespace CATIAAssistant
                 return;
             }
 
-            if (!validationHelper.ValidateProductDocument(_catia, _productDoc, _drawingDoc))
+            if (!validationHelper.ValidateProductDocument(_catia, _drawingDoc))
             {
                 InformationLabel.Text = "No product found";
                 dataGridView1.Rows.Clear();
                 return;
             }
+            // todo güncellenecek: sadece component sayýlarýný almak için kullanýlabilir. karþýlaþtýrma iþlemi için item no, product'ýn properties kýsmýndan alýnabilir.
             _productDoc = validationHelper.ProductDocument;
-
             var drawingService = new DrawingDocumentService(_drawingDoc);
             var productService = new ProductDocumentService(_productDoc);
             var dataRows = drawingService.GetDrawingComponentsTextData();
-            productService.GetProductBomParameterValues(_productDoc);
+            productService.GetProductBomParameterValues();
             // DataGridView sütunlarýný, en fazla veri içeren satýrýn uzunluðuna göre sabitliyoruz.
             if (dataRows.Count > 0)
             {
@@ -235,7 +238,7 @@ namespace CATIAAssistant
             }
 
             // Excel BOM dosya yolu
-            string excelPath = _drawingDoc?.FullName?.Split('\\').Last().Split('.')[0] + ".xlsx";
+            string excelPath = _drawingDoc?.Path + $"{_drawingDoc?.get_Name().Split('.')[0]}.xlsx";
             ComparisonHelper comparisonHelper = new();
             using (var excelService = new ExcelService())
             {

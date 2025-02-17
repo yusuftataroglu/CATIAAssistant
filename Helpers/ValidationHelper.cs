@@ -76,14 +76,13 @@ namespace CATIAAssistant.Helpers
             return true;
         }
 
-        public bool ValidateProductDocument(INFITF.Application catia, ProductDocument productDocument, DrawingDocument drawingDocument)
+        public bool ValidateProductDocument(INFITF.Application catia, DrawingDocument drawingDocument)
         {
             try
             {
                 CatiaDocumentHelper catiaDocumentHelper = new(catia);
                 string drawingDocName = drawingDocument.get_Name().Split('.')[0];
                 _productDocument = catia.Documents.Item(drawingDocName + ".CATProduct") as ProductDocument;
-                string name = _productDocument.get_Name();
                 return true;
             }
             catch (Exception)
