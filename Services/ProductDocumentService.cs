@@ -11,10 +11,8 @@ namespace CATIAAssistant.Services
             productDocument = productDocument;
         }
 
-        public void GetProductBomParameterValues(ProductDocument productDocument)
+        public void GetProductBomParameterValues()
         {
-            string name = _productDocument.Product.get_Name();
-            string name2 = _productDocument.Product.Products.Name;
         }
     }
 }

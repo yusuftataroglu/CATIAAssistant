@@ -76,7 +76,7 @@ namespace CATIAAssistant.Helpers
             return true;
         }
 
-        public bool ValidateProductDocument(INFITF.Application catia, ProductDocument productDocument, DrawingDocument drawingDocument)
+        public bool ValidateProductDocument(INFITF.Application catia, DrawingDocument drawingDocument)
         {
             try
             {
