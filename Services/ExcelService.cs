@@ -46,7 +46,7 @@ namespace Catia_Macro_Test.Services
             int rowCount = usedRange.Rows.Count;
             int colCount = usedRange.Columns.Count;
             var bomItems = new List<BomItem>();
-            for (int row = startRow; row <= endRow && row <= rowCount; row++)
+            for (int row = startRow; row <= endRow; row++)
             {
                 bool isRowEmpty = true;
                 for (int col = 1; col <= colCount; col++)

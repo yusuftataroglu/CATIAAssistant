@@ -1,9 +1,14 @@
 ﻿using DRAFTINGITF;
+using INFITF;
+using ProductStructureTypeLib;
 
 namespace CATIAAssistant.Helpers
 {
     public class ValidationHelper
     {
+        private ProductDocument _productDocument;
+
+        public ProductDocument ProductDocument { get => _productDocument; set => _productDocument = value; }
         /// <summary>
         /// Dokümanın bir DrawingDocument olup olmadığını kontrol eder.
         /// </summary>
@@ -33,9 +38,7 @@ namespace CATIAAssistant.Helpers
         public bool ValidateActiveSheetViewsCount(DrawingDocument drawingDocument)
         {
             if (drawingDocument.Sheets.ActiveSheet.Views.Count <= 2)
-            {
                 return false;
-            }
             return true;
         }
 
@@ -47,9 +50,7 @@ namespace CATIAAssistant.Helpers
         {
             DrawingView activeView = drawingDocument.Sheets.ActiveSheet.Views.ActiveView;
             if (activeView.get_Name() == "Main View" || activeView.get_Name() == "Background View")
-            {
                 return false;
-            }
             return true;
         }
 
@@ -60,10 +61,7 @@ namespace CATIAAssistant.Helpers
         public bool ValidateActiveViewComponentsCount(DrawingDocument drawingDocument)
         {
             if (drawingDocument.Sheets.ActiveSheet.Views.ActiveView.Components.Count == 0)
-            {
-
                 return false;
-            }
             return true;
         }
 
@@ -74,10 +72,25 @@ namespace CATIAAssistant.Helpers
         public bool ValidateDetailSheet(DrawingDocument drawingDocument)
         {
             if (drawingDocument.Sheets.ActiveSheet.IsDetail())
+                return false;
+            return true;
+        }
+
+        public bool ValidateProductDocument(INFITF.Application catia, ProductDocument productDocument, DrawingDocument drawingDocument)
+        {
+            try
+            {
+                CatiaDocumentHelper catiaDocumentHelper = new(catia);
+                string drawingDocName = drawingDocument.get_Name().Split('.')[0];
+                _productDocument = catia.Documents.Item(drawingDocName + ".CATProduct") as ProductDocument;
+                string name = _productDocument.get_Name();
+                return true;
+            }
+            catch (Exception)
             {
                 return false;
             }
-            return true;
         }
+
     }
 }

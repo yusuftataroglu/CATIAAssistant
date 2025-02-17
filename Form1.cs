@@ -14,13 +14,11 @@ namespace CATIAAssistant
         private ProductStructureTypeLib.ProductDocument _productDoc;
         private MECMOD.PartDocument _partDoc;
         private DRAFTINGITF.DrawingDocument _drawingDoc;
-        private readonly ValidationHelper _validationHelper;
         private List<ComponentItem> _catiaComponents = new List<ComponentItem>();
 
-        public Form1(ValidationHelper validationHelper)
+        public Form1()
         {
             InitializeComponent();
-            _validationHelper = validationHelper;
         }
 
         #region Form Load and UI Initialization
@@ -107,51 +105,60 @@ namespace CATIAAssistant
         private void button2_Click(object sender, EventArgs e)
         {
             InformationLabel.Text = "";
-
-            if (!_validationHelper.ValidateDrawingDocument(_docType))
+            var validationHelper = new ValidationHelper();
+            if (!validationHelper.ValidateDrawingDocument(_docType))
             {
                 InformationLabel.Text = "Type of this document is not \"Drawing\"";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
-            if (!_validationHelper.ValidateSheetsCount(_drawingDoc))
+            if (!validationHelper.ValidateSheetsCount(_drawingDoc))
             {
                 InformationLabel.Text = "No sheet found in this drawing";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
-            if (!_validationHelper.ValidateDetailSheet(_drawingDoc))
+            if (!validationHelper.ValidateDetailSheet(_drawingDoc))
             {
                 InformationLabel.Text = "Can not read component datas in detail sheet";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
-            if (!_validationHelper.ValidateActiveSheetViewsCount(_drawingDoc))
+            if (!validationHelper.ValidateActiveSheetViewsCount(_drawingDoc))
             {
                 InformationLabel.Text = "No view found in this sheet";
                 dataGridView1.Rows.Clear();
                 return;
             }
-            if (!_validationHelper.ValidateActiveView(_drawingDoc))
+            if (!validationHelper.ValidateActiveView(_drawingDoc))
             {
                 InformationLabel.Text = "No active view found in this sheet";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
-            if (!_validationHelper.ValidateActiveViewComponentsCount(_drawingDoc))
+            if (!validationHelper.ValidateActiveViewComponentsCount(_drawingDoc))
             {
                 InformationLabel.Text = "No component found in the active view";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
-            var drawingService = new DrawingDocumentService(_drawingDoc);
-            var dataRows = drawingService.GetDrawingComponentsTextData();
+            if (!validationHelper.ValidateProductDocument(_catia, _productDoc, _drawingDoc))
+            {
+                InformationLabel.Text = "No product found";
+                dataGridView1.Rows.Clear();
+                return;
+            }
+            _productDoc = validationHelper.ProductDocument;
 
+            var drawingService = new DrawingDocumentService(_drawingDoc);
+            var productService = new ProductDocumentService(_productDoc);
+            var dataRows = drawingService.GetDrawingComponentsTextData();
+            productService.GetProductBomParameterValues(_productDoc);
             // DataGridView sütunlarýný, en fazla veri içeren satýrýn uzunluðuna göre sabitliyoruz.
             if (dataRows.Count > 0)
             {
@@ -214,16 +221,21 @@ namespace CATIAAssistant
         {
             InformationLabel.Text = "";
             ActiveExcelLabel.ForeColor = Color.Black;
-
-            if (!_validationHelper.ValidateDrawingDocument(_docType))
+            var validationHelper = new ValidationHelper();
+            if (!validationHelper.ValidateDrawingDocument(_docType))
             {
                 InformationLabel.Text = "Type of this document is not \"Drawing\"";
                 dataGridView1.Rows.Clear();
                 return;
             }
+            if (_catiaComponents.Count == 0)
+            {
+                InformationLabel.Text = "Read components first";
+                return;
+            }
 
             // Excel BOM dosya yolu
-            string excelPath = _drawingDoc?.FullName?.Split('.')[0] + ".xlsx";
+            string excelPath = _drawingDoc?.FullName?.Split('\\').Last().Split('.')[0] + ".xlsx";
             ComparisonHelper comparisonHelper = new();
             using (var excelService = new ExcelService())
             {
@@ -240,7 +252,7 @@ namespace CATIAAssistant
                 // Örneðin: satýr 14'ten 100'e kadar kontrol edelim.
                 var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
                 // Karþýlaþtýrma
-                comparisonHelper.CompareCatiaAndBom(_catiaComponents,bomItems);
+                comparisonHelper.CompareCatiaAndBom(_catiaComponents, bomItems);
             }
         }
         #endregion
