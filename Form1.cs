@@ -17,7 +17,7 @@ namespace CATIAAssistant
         private ProductStructureTypeLib.ProductDocument _productDoc;
         private MECMOD.PartDocument _partDoc;
         private DRAFTINGITF.DrawingDocument _drawingDoc;
-        private List<ComponentItem> _catiaComponents = new List<ComponentItem>();
+        private List<ProductParameter> _catiaComponents = new List<ProductParameter>();
 
         public Form1()
         {
@@ -74,8 +74,18 @@ namespace CATIAAssistant
                 return;
             }
 
-            // Doküman adını siyah renkle ekliyoruz.
+            try
+            {
             _activeDoc = docHelper.GetActiveDocument();
+            }
+            catch (Exception)
+            {
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = "No active document found";
+                return;
+            }
+
+            // Doküman adını siyah renkle ekliyoruz.
             ActiveDocumentLabel.ForeColor = Color.Black;
             ActiveDocumentLabel.Text = $"{_activeDoc.get_Name()}";
 
@@ -178,72 +188,56 @@ namespace CATIAAssistant
                 dataGridView1.Rows.Add(row);
             }
             SetRowNumber(dataGridView1);
-
-            //var parseQuantityHelper = new ParseQuantityHelper();
-
-            //_catiaComponents.Clear();
-            //foreach (DataGridViewRow row in dataGridView1.Rows)
-            //{
-            //    // 0. hücrede ItemNo, 1. hücrede "2x/3x" gibi bir metin varsayıyoruz
-            //    if (row.Cells[0].Value != null && row.Cells[1].Value != null)
-            //    {
-            //        string itemNo = row.Cells[0].Value.ToString();
-            //        string quantityText = row.Cells[1].Value.ToString(); // Örneğin "2x/3x"
-
-            //        // Slash üzerinden parçalama
-            //        // "2x/3x" => ["2x", "3x"]
-            //        string[] parts = quantityText.Split('/');
-
-            //        int quantityDrawn = 0;
-            //        int quantityMirror = 0;
-
-            //        // parts[0] = "2x" => quantityDrawn
-            //        if (parts.Length > 0)
-            //        {
-            //            quantityDrawn = parseQuantityHelper.ParseQuantity(parts[0]);
-            //        }
-
-            //        // parts[1] = "3x" => quantityMirror
-            //        if (parts.Length > 1)
-            //        {
-            //            quantityMirror = parseQuantityHelper.ParseQuantity(parts[1]);
-            //        }
-
-            //        _catiaComponents.Add(new ComponentItem
-            //        {
-            //            ItemNo = int.Parse(itemNo),// todo hata verebilir.
-            //            QuantityDrawn = quantityDrawn,
-            //            QuantityMirror = quantityMirror
-            //        });
-            //    }
-            //}
         }
         #endregion
         #region Button3 Click Handlers
         private void button3_Click(object sender, EventArgs e)
         {
-            var validationHelper = new ValidationHelper();
-            if (_catia == null)
+            // Catia bağlantısı
+            var comService = new COMService();
+            try
+            {
+                _catia = (INFITF.Application)comService.GetActiveObject("CATIA.Application");
+
+            }
+            catch (Exception)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = "CATIA application cannot be found";
                 dataGridView1.Rows.Clear();
                 return;
             }
-
-            CatiaDocumentHelper docHelper= new CatiaDocumentHelper(_catia);
+            
+            CatiaDocumentHelper docHelper = new CatiaDocumentHelper(_catia);
             if (docHelper.GetDocumentsCount() == 0)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = "No document found";
                 return;
             }
+
+            var validationHelper = new ValidationHelper();
+            try
+            {
+                _productDoc = validationHelper.GetProductDocument(_catia, _activeDoc);
+            }
+            catch (Exception ex)
+            {
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = ex.Message;
+                return;
+            }
+
             ActiveDocumentLabel.ForeColor = Color.Black;
+            ActiveDocumentLabel.Text = _activeDoc.get_Name();
+
+            ProductDocumentService productDocumentService = new ProductDocumentService(_productDoc);
+            List<ProductParameter> productParameters = new List<ProductParameter>();
+            productDocumentService.GetProductParameterValues();
 
             // Excel BOM dosya yolu
             string documentExtensionName = _activeDoc.get_Name().Split('.')[1];
-            string excelPath = $"{_activeDoc?.FullName.Replace($".{documentExtensionName}",".xlsx")}";
-            //ComparisonHelper comparisonHelper = new();
+            string excelPath = $"{_activeDoc?.FullName.Replace($".{documentExtensionName}", ".xlsx")}";
             using (var excelService = new ExcelService())
             {
                 if (!excelService.OpenWorkbook(excelPath))
@@ -259,7 +253,8 @@ namespace CATIAAssistant
                 // Örneğin: satır 14'ten 100'e kadar kontrol edelim.
                 var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
                 // Karşılaştırma
-                //comparisonHelper.CompareCatiaAndBom(_catiaComponents, bomItems);
+                ComparisonHelper comparisonHelper = new();
+                comparisonHelper.CompareCatiaAndBom(productParameters, bomItems);
             }
         }
         #endregion

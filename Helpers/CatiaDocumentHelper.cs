@@ -16,7 +16,14 @@ namespace CATIAAssistant.Helpers
         /// </summary>
         public INFITF.Document GetActiveDocument()
         {
-            return _catia.ActiveDocument;
+            try
+            {
+                return _catia.ActiveDocument;
+            }
+            catch (Exception)
+            {
+                throw new Exception("No active document found");
+            }
         }
 
         /// <summary>

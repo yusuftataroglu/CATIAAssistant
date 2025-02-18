@@ -87,18 +87,27 @@ namespace CATIAAssistant.Helpers
             return true;
         }
 
-        public bool ValidateProductDocument(INFITF.Application catia, DrawingDocument drawingDocument)
+        public ProductDocument GetProductDocument(INFITF.Application catia, Document document)
         {
+            string docName;
             try
             {
                 CatiaDocumentHelper catiaDocumentHelper = new(catia);
-                string drawingDocName = drawingDocument.get_Name().Split('.')[0];
-                _productDocument = catia.Documents.Item(drawingDocName + ".CATProduct") as ProductDocument;
-                return true;
+                docName = document.get_Name().Split('.')[0];
             }
             catch (Exception)
             {
-                return false;
+                throw new Exception("Read document first");
+            }
+
+            try
+            {
+                _productDocument = catia.Documents.Item(docName + ".CATProduct") as ProductDocument;
+                return _productDocument;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Related document can not be found");
             }
         }
 

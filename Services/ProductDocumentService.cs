@@ -8,11 +8,21 @@ namespace CATIAAssistant.Services
 
         public ProductDocumentService(ProductDocument productDocument)
         {
-            productDocument = productDocument;
+            _productDocument = productDocument;
         }
 
-        public void GetProductBomParameterValues()
+        public void GetProductParameterValues()
         {
+            List<string> parameterValues = new List<string>();
+            Products products = _productDocument.Product.Products;
+            foreach (Product product in products)
+            {
+                foreach (Product item in product.Products)
+                {
+                parameterValues.Add(item.get_DescriptionInst());
+
+                }
+            }
         }
     }
 }
