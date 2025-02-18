@@ -1,4 +1,4 @@
-using Catia_Macro_Test.Services;
+ï»¿using Catia_Macro_Test.Services;
 using CATIAAssistant.Helpers;
 using CATIAAssistant.Models;
 using CATIAAssistant.Services;
@@ -30,10 +30,10 @@ namespace CATIAAssistant
         {
             TopMost = true;
             InformationLabel.Text = "";
-            // Sabit metin: "Active document:" kýsmý her zaman görünür
+            // Sabit metin: "Active document:" kÄ±smÄ± her zaman gÃ¶rÃ¼nÃ¼r
             ActiveDocumentPrefixLabel.Text = "Active Catia Doc:";
             ActiveDocumentLabel.Text = "";
-            // Sabit metin: "Active excel:" kýsmý her zaman görünür
+            // Sabit metin: "Active excel:" kÄ±smÄ± her zaman gÃ¶rÃ¼nÃ¼r
             ActiveExcelPrefixLabel.Text = "Active Excel Doc:";
             ActiveExcelLabel.Text = "";
 
@@ -42,14 +42,14 @@ namespace CATIAAssistant
         #endregion
         #region Button1 Click Handlers
 
-        // Button1: CATIA'ya baðlan ve aktif dokümaný initialize et.
+        // Button1: CATIA'ya baÄŸlan ve aktif dokÃ¼manÄ± initialize et.
         private void button1_Click(object sender, EventArgs e)
         {
-            // Temizleme iþlemleri
+            // Temizleme iÅŸlemleri
             ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
 
-            // Catia baðlantýsý
+            // Catia baÄŸlantÄ±sÄ±
             var comService = new COMService();
             try
             {
@@ -63,10 +63,10 @@ namespace CATIAAssistant
                 return;
             }
 
-            // Yeni bir CatiaDocumentHelper oluþturuyoruz.
+            // Yeni bir CatiaDocumentHelper oluÅŸturuyoruz.
             var docHelper = new CatiaDocumentHelper(_catia);
 
-            // Doküman sayýsýný kontrol ediyoruz.
+            // DokÃ¼man sayÄ±sÄ±nÄ± kontrol ediyoruz.
             if (docHelper.GetDocumentsCount() == 0)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
@@ -74,15 +74,15 @@ namespace CATIAAssistant
                 return;
             }
 
-            // Doküman adýný siyah renkle ekliyoruz.
+            // DokÃ¼man adÄ±nÄ± siyah renkle ekliyoruz.
             _activeDoc = docHelper.GetActiveDocument();
             ActiveDocumentLabel.ForeColor = Color.Black;
             ActiveDocumentLabel.Text = $"{_activeDoc.get_Name()}";
 
-            // Doküman türünü alýyoruz.
+            // DokÃ¼man tÃ¼rÃ¼nÃ¼ alÄ±yoruz.
             _docType = docHelper.GetDocumentType(_activeDoc);
 
-            // Doküman türüne göre ilgili nesneyi set ediyoruz.
+            // DokÃ¼man tÃ¼rÃ¼ne gÃ¶re ilgili nesneyi set ediyoruz.
             if (_docType == "DrawingDocument")
             {
                 _drawingDoc = (DRAFTINGITF.DrawingDocument)_activeDoc;
@@ -104,7 +104,7 @@ namespace CATIAAssistant
         }
         #endregion
         #region Button2 Click Handlers
-        // Button2: DrawingDocument içindeki component'lardan metin verilerini DataGridView'e aktar.
+        // Button2: DrawingDocument iÃ§indeki component'lardan metin verilerini DataGridView'e aktar.
         private void button2_Click(object sender, EventArgs e)
         {
             InformationLabel.Text = "";
@@ -156,7 +156,7 @@ namespace CATIAAssistant
                 return;
             }
 
-            // Eðer component'larda okunacak veri yoksa dataRows.Count = 0 oluyor ve boþuna devam etmesini önlüyoruz.
+            // EÄŸer component'larda okunacak veri yoksa dataRows.Count = 0 oluyor ve boÅŸuna devam etmesini Ã¶nlÃ¼yoruz.
             if (dataRows.Count == 0)
             {
                 InformationLabel.Text = "No readable text found in components of active view";
@@ -164,7 +164,7 @@ namespace CATIAAssistant
                 return;
             }
 
-            // Eðer component'larda okunacak veri varsa DataGridView sütunlarýný, en fazla veri içeren satýrýn uzunluðuna göre sabitliyoruz.
+            // EÄŸer component'larda okunacak veri varsa DataGridView sÃ¼tunlarÄ±nÄ±, en fazla veri iÃ§eren satÄ±rÄ±n uzunluÄŸuna gÃ¶re sabitliyoruz.
             int columnCount = dataRows[0].Length;
 
             dataGridView1.Columns.Clear();
@@ -184,13 +184,13 @@ namespace CATIAAssistant
             //_catiaComponents.Clear();
             //foreach (DataGridViewRow row in dataGridView1.Rows)
             //{
-            //    // 0. hücrede ItemNo, 1. hücrede "2x/3x" gibi bir metin varsayýyoruz
+            //    // 0. hÃ¼crede ItemNo, 1. hÃ¼crede "2x/3x" gibi bir metin varsayÄ±yoruz
             //    if (row.Cells[0].Value != null && row.Cells[1].Value != null)
             //    {
             //        string itemNo = row.Cells[0].Value.ToString();
-            //        string quantityText = row.Cells[1].Value.ToString(); // Örneðin "2x/3x"
+            //        string quantityText = row.Cells[1].Value.ToString(); // Ã–rneÄŸin "2x/3x"
 
-            //        // Slash üzerinden parçalama
+            //        // Slash Ã¼zerinden parÃ§alama
             //        // "2x/3x" => ["2x", "3x"]
             //        string[] parts = quantityText.Split('/');
 
@@ -247,9 +247,9 @@ namespace CATIAAssistant
                 ActiveExcelLabel.Text = $"{excelService.Workbook.Name}";
 
                 Excel.Range usedRange = excelService.GetUsedRange();
-                // Örneðin: satýr 14'ten 100'e kadar kontrol edelim.
+                // Ã–rneÄŸin: satÄ±r 14'ten 100'e kadar kontrol edelim.
                 var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
-                // Karþýlaþtýrma
+                // KarÅŸÄ±laÅŸtÄ±rma
                 comparisonHelper.CompareCatiaAndBom(_catiaComponents, bomItems);
             }
         }
@@ -277,7 +277,28 @@ namespace CATIAAssistant
             this.TopMost = checkBoxAlwaysOnTop.Checked;
         }
 
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            int totalDrawn = 0;
+            int totalMirror = 0;
+
+            foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
+            {
+                if (cell.Value is string cellValue)
+                {
+                    var (drawn, mirror) = new ParseQuantityHelper().ParseDrawnMirror(cellValue);
+                    totalDrawn += drawn;
+                    totalMirror += mirror;
+                }
+            }
+
+            InformationLabel.Text = $"Sum: {totalDrawn}x/{totalMirror}x";
+        }
+        
         #endregion
+
+
     }
 }
 

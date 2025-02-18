@@ -79,7 +79,7 @@
             button2.Name = "button2";
             button2.Size = new Size(153, 49);
             button2.TabIndex = 2;
-            button2.Text = "Read Components";
+            button2.Text = "Read Components of Active View";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 
@@ -205,12 +205,14 @@
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.GridColor = SystemColors.ControlDark;
             dataGridView1.Location = new Point(3, 6);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToFirstHeader;
             dataGridView1.Size = new Size(537, 274);
             dataGridView1.TabIndex = 0;
+            dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
             dataGridView1.Sorted += dataGridView1_Sorted;
             // 
             // statusStrip3
