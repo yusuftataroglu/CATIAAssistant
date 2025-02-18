@@ -222,19 +222,28 @@ namespace CATIAAssistant
         #region Button3 Click Handlers
         private void button3_Click(object sender, EventArgs e)
         {
-            InformationLabel.Text = "";
-            ActiveExcelLabel.ForeColor = Color.Black;
             var validationHelper = new ValidationHelper();
             if (_catia == null)
             {
-                InformationLabel.Text = "No document found";
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = "CATIA application cannot be found";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
+            CatiaDocumentHelper docHelper= new CatiaDocumentHelper(_catia);
+            if (docHelper.GetDocumentsCount() == 0)
+            {
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = "No document found";
+                return;
+            }
+            ActiveDocumentLabel.ForeColor = Color.Black;
+
             // Excel BOM dosya yolu
-            string excelPath = _drawingDoc?.Path + $"{_drawingDoc?.get_Name().Split('.')[0]}.xlsx";
-            ComparisonHelper comparisonHelper = new();
+            string documentExtensionName = _activeDoc.get_Name().Split('.')[1];
+            string excelPath = $"{_activeDoc?.FullName.Replace($".{documentExtensionName}",".xlsx")}";
+            //ComparisonHelper comparisonHelper = new();
             using (var excelService = new ExcelService())
             {
                 if (!excelService.OpenWorkbook(excelPath))
@@ -243,14 +252,14 @@ namespace CATIAAssistant
                     ActiveExcelLabel.Text = "Excel document cannot be found";
                     return;
                 }
-
+                ActiveExcelLabel.ForeColor = Color.Black;
                 ActiveExcelLabel.Text = $"{excelService.Workbook.Name}";
 
                 Excel.Range usedRange = excelService.GetUsedRange();
                 // Örneğin: satır 14'ten 100'e kadar kontrol edelim.
                 var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
                 // Karşılaştırma
-                comparisonHelper.CompareCatiaAndBom(_catiaComponents, bomItems);
+                //comparisonHelper.CompareCatiaAndBom(_catiaComponents, bomItems);
             }
         }
         #endregion
@@ -268,16 +277,9 @@ namespace CATIAAssistant
                 row.HeaderCell.Value = (row.Index + 1).ToString();
             }
         }
-
         #endregion
-        #region Other UI Handlers
 
-        private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)
-        {
-            this.TopMost = checkBoxAlwaysOnTop.Checked;
-        }
-
-
+        #region DataGridView Sum of Selected Cell Values
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
             int totalDrawn = 0;
@@ -295,7 +297,13 @@ namespace CATIAAssistant
 
             InformationLabel.Text = $"Sum: {totalDrawn}x/{totalMirror}x";
         }
-        
+        #endregion
+
+        #region Other UI Handlers
+        private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)
+        {
+            this.TopMost = checkBoxAlwaysOnTop.Checked;
+        }
         #endregion
 
 

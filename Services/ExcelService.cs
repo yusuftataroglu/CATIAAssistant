@@ -43,7 +43,7 @@ namespace Catia_Macro_Test.Services
         }
         public List<BomItem> ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow)
         {
-            int rowCount = usedRange.Rows.Count;
+            //int rowCount = usedRange.Rows.Count; Sabit satır sayısı kullanıyoruz.
             int colCount = usedRange.Columns.Count;
             var bomItems = new List<BomItem>();
             for (int row = startRow; row <= endRow; row++)
@@ -62,34 +62,37 @@ namespace Catia_Macro_Test.Services
                 if (!isRowEmpty)
                 {
                     // Bu satır dolu, veri çekilecek.
-                    int itemNo;
-                    if (!int.TryParse((usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString(), out itemNo))
-                        itemNo = 0;
-
-                    int indexVal;
-                    if (!int.TryParse((usedRange.Cells[row, 2] as Excel.Range)?.Value2?.ToString(), out indexVal))
-                        indexVal = 0;
-
-                    int drawn;
-                    if (!int.TryParse((usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString(), out drawn))
-                        drawn = 0;
-
-                    int mirror;
-                    if (!int.TryParse((usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString(), out mirror))
-                        mirror = 0;
+                    string itemNo = (usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string description = (usedRange.Cells[row, 5] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string manufacturer = (usedRange.Cells[row, 6] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string orderNo = (usedRange.Cells[row, 7] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string typeNo = (usedRange.Cells[row, 8] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string customerOrderNo = (usedRange.Cells[row, 9] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string materialNo = (usedRange.Cells[row, 11] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string dimensions = (usedRange.Cells[row, 12] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string length = (usedRange.Cells[row, 13] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string sparePart = (usedRange.Cells[row, 16] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string remark = (usedRange.Cells[row, 17] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
 
                     bomItems.Add(new BomItem
                     {
                         ItemNo = itemNo,
-                        Index = indexVal,
-                        QuantityDrawn = drawn,
-                        QuantityMirror = mirror
+                        Description = description,
+                        Manufacturer = manufacturer,
+                        OrderNo = orderNo,
+                        TypeNo = typeNo,
+                        CustomerOrderNo = customerOrderNo,
+                        MaterialNo = materialNo,
+                        Dimensions = dimensions,
+                        Length = length,
+                        SparePart = sparePart,
+                        Remark = remark
                     });
                 }
             }
             return bomItems;
         }
-        
+
 
         public void Quit()
         {
