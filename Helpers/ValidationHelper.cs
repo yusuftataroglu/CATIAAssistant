@@ -66,6 +66,17 @@ namespace CATIAAssistant.Helpers
         }
 
         /// <summary>
+        /// Verilen view'ın component içerip içermediğini kontrol eder.
+        /// </summary>
+        /// <returns>Geçerliyse true, aksi halde false döner.</returns>
+        public bool ValidateGivenViewComponentsCount(DrawingView drawingView)
+        {
+            if (drawingView.Components.Count == 0)
+                return false;
+            return true;
+        }
+
+        /// <summary>
         /// Aktif sheet'in detail sheet olup olmadığını kontrol eder.
         /// </summary>
         /// <returns>Geçerliyse true, aksi halde false döner.</returns>

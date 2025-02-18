@@ -37,7 +37,10 @@
             ActiveDocumentPrefixLabel = new ToolStripStatusLabel();
             ActiveDocumentLabel = new ToolStripStatusLabel();
             splitContainer1 = new SplitContainer();
+            panel2 = new Panel();
             button3 = new Button();
+            panel1 = new Panel();
+            checkBoxIncludeOtherViews = new CheckBox();
             dataGridView1 = new DataGridView();
             statusStrip3 = new StatusStrip();
             ActiveExcelPrefixLabel = new ToolStripStatusLabel();
@@ -48,6 +51,8 @@
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            panel2.SuspendLayout();
+            panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             statusStrip3.SuspendLayout();
             SuspendLayout();
@@ -58,7 +63,7 @@
             checkBoxAlwaysOnTop.AutoSize = true;
             checkBoxAlwaysOnTop.Checked = true;
             checkBoxAlwaysOnTop.CheckState = CheckState.Checked;
-            checkBoxAlwaysOnTop.Location = new Point(6, 270);
+            checkBoxAlwaysOnTop.Location = new Point(3, 261);
             checkBoxAlwaysOnTop.Name = "checkBoxAlwaysOnTop";
             checkBoxAlwaysOnTop.Size = new Size(129, 24);
             checkBoxAlwaysOnTop.TabIndex = 3;
@@ -70,9 +75,9 @@
             // button2
             // 
             button2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            button2.Location = new Point(6, 61);
+            button2.Location = new Point(3, 3);
             button2.Name = "button2";
-            button2.Size = new Size(155, 49);
+            button2.Size = new Size(153, 49);
             button2.TabIndex = 2;
             button2.Text = "Read Components";
             button2.UseVisualStyleBackColor = true;
@@ -81,9 +86,9 @@
             // button1
             // 
             button1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            button1.Location = new Point(6, 6);
+            button1.Location = new Point(3, 3);
             button1.Name = "button1";
-            button1.Size = new Size(155, 49);
+            button1.Size = new Size(161, 49);
             button1.TabIndex = 1;
             button1.Text = "Read Document";
             button1.UseVisualStyleBackColor = true;
@@ -139,28 +144,58 @@
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(button3);
-            splitContainer1.Panel1.Controls.Add(checkBoxAlwaysOnTop);
-            splitContainer1.Panel1.Controls.Add(button1);
-            splitContainer1.Panel1.Controls.Add(button2);
+            splitContainer1.Panel1.Controls.Add(panel2);
             // 
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(dataGridView1);
             splitContainer1.Size = new Size(720, 297);
-            splitContainer1.SplitterDistance = 164;
+            splitContainer1.SplitterDistance = 173;
             splitContainer1.TabIndex = 4;
+            // 
+            // panel2
+            // 
+            panel2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panel2.Controls.Add(button1);
+            panel2.Controls.Add(button3);
+            panel2.Controls.Add(checkBoxAlwaysOnTop);
+            panel2.Controls.Add(panel1);
+            panel2.Location = new Point(3, 6);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(167, 288);
+            panel2.TabIndex = 6;
             // 
             // button3
             // 
             button3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            button3.Location = new Point(6, 116);
+            button3.Location = new Point(3, 154);
             button3.Name = "button3";
-            button3.Size = new Size(155, 49);
+            button3.Size = new Size(161, 49);
             button3.TabIndex = 4;
-            button3.Text = "Read BOM";
+            button3.Text = "Read Parameter Values";
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
+            // 
+            // panel1
+            // 
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(checkBoxIncludeOtherViews);
+            panel1.Controls.Add(button2);
+            panel1.Location = new Point(3, 58);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(161, 90);
+            panel1.TabIndex = 5;
+            // 
+            // checkBoxIncludeOtherViews
+            // 
+            checkBoxIncludeOtherViews.AutoSize = true;
+            checkBoxIncludeOtherViews.Location = new Point(3, 58);
+            checkBoxIncludeOtherViews.Name = "checkBoxIncludeOtherViews";
+            checkBoxIncludeOtherViews.Size = new Size(158, 24);
+            checkBoxIncludeOtherViews.TabIndex = 3;
+            checkBoxIncludeOtherViews.Text = "Include other views";
+            checkBoxIncludeOtherViews.UseVisualStyleBackColor = true;
             // 
             // dataGridView1
             // 
@@ -174,7 +209,7 @@
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToFirstHeader;
-            dataGridView1.Size = new Size(546, 288);
+            dataGridView1.Size = new Size(537, 274);
             dataGridView1.TabIndex = 0;
             dataGridView1.Sorted += dataGridView1_Sorted;
             // 
@@ -222,10 +257,13 @@
             statusStrip2.ResumeLayout(false);
             statusStrip2.PerformLayout();
             splitContainer1.Panel1.ResumeLayout(false);
-            splitContainer1.Panel1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             statusStrip3.ResumeLayout(false);
             statusStrip3.PerformLayout();
@@ -248,5 +286,8 @@
         private StatusStrip statusStrip3;
         private ToolStripStatusLabel ActiveExcelPrefixLabel;
         private ToolStripStatusLabel ActiveExcelLabel;
+        private Panel panel1;
+        private CheckBox checkBoxIncludeOtherViews;
+        private Panel panel2;
     }
 }

@@ -132,45 +132,45 @@ namespace CATIAAssistant
 
             if (!validationHelper.ValidateActiveSheetViewsCount(_drawingDoc))
             {
-                InformationLabel.Text = "No view found in this sheet";
+                InformationLabel.Text = "No view found in the active sheet";
                 dataGridView1.Rows.Clear();
                 return;
             }
             if (!validationHelper.ValidateActiveView(_drawingDoc))
             {
-                InformationLabel.Text = "No active view found in this sheet";
+                InformationLabel.Text = "No active view found in the active sheet";
                 dataGridView1.Rows.Clear();
                 return;
             }
 
-            if (!validationHelper.ValidateActiveViewComponentsCount(_drawingDoc))
-            {
-                InformationLabel.Text = "No component found in the active view";
-                dataGridView1.Rows.Clear();
-                return;
-            }
-
-            if (!validationHelper.ValidateProductDocument(_catia, _drawingDoc))
-            {
-                InformationLabel.Text = "No product found";
-                dataGridView1.Rows.Clear();
-                return;
-            }
-            // todo güncellenecek: sadece component sayýlarýný almak için kullanýlabilir. karþýlaþtýrma iþlemi için item no, product'ýn properties kýsmýndan alýnabilir.
-            _productDoc = validationHelper.ProductDocument;
             var drawingService = new DrawingDocumentService(_drawingDoc);
-            var productService = new ProductDocumentService(_productDoc);
-            var dataRows = drawingService.GetDrawingComponentsTextData();
-            productService.GetProductBomParameterValues();
-            // DataGridView sütunlarýný, en fazla veri içeren satýrýn uzunluðuna göre sabitliyoruz.
-            if (dataRows.Count > 0)
+            var dataRows = new List<string[]>();
+            try
             {
-                int columnCount = dataRows[0].Length;
-                dataGridView1.Columns.Clear();
-                for (int i = 0; i < columnCount; i++)
-                {
-                    dataGridView1.Columns.Add($"Column{i + 1}", $"Column{i + 1}");
-                }
+                dataRows = drawingService.GetDrawingComponentsTextData(checkBoxIncludeOtherViews.Checked);
+            }
+            catch (Exception ex)
+            {
+                InformationLabel.Text = ex.Message;
+                dataGridView1.Rows.Clear();
+                return;
+            }
+
+            // Eðer component'larda okunacak veri yoksa dataRows.Count = 0 oluyor ve boþuna devam etmesini önlüyoruz.
+            if (dataRows.Count == 0)
+            {
+                InformationLabel.Text = "No readable text found in components of active view";
+                dataGridView1.Rows.Clear();
+                return;
+            }
+
+            // Eðer component'larda okunacak veri varsa DataGridView sütunlarýný, en fazla veri içeren satýrýn uzunluðuna göre sabitliyoruz.
+            int columnCount = dataRows[0].Length;
+
+            dataGridView1.Columns.Clear();
+            for (int i = 0; i < columnCount; i++)
+            {
+                dataGridView1.Columns.Add($"Column{i + 1}", $"Column{i + 1}");
             }
             dataGridView1.Rows.Clear();
             foreach (var row in dataRows)
@@ -179,44 +179,44 @@ namespace CATIAAssistant
             }
             SetRowNumber(dataGridView1);
 
-            var parseQuantityHelper = new ParseQuantityHelper();
+            //var parseQuantityHelper = new ParseQuantityHelper();
 
-            _catiaComponents.Clear();
-            foreach (DataGridViewRow row in dataGridView1.Rows)
-            {
-                // 0. hücrede ItemNo, 1. hücrede "2x/3x" gibi bir metin varsayýyoruz
-                if (row.Cells[0].Value != null && row.Cells[1].Value != null)
-                {
-                    string itemNo = row.Cells[0].Value.ToString();
-                    string quantityText = row.Cells[1].Value.ToString(); // Örneðin "2x/3x"
+            //_catiaComponents.Clear();
+            //foreach (DataGridViewRow row in dataGridView1.Rows)
+            //{
+            //    // 0. hücrede ItemNo, 1. hücrede "2x/3x" gibi bir metin varsayýyoruz
+            //    if (row.Cells[0].Value != null && row.Cells[1].Value != null)
+            //    {
+            //        string itemNo = row.Cells[0].Value.ToString();
+            //        string quantityText = row.Cells[1].Value.ToString(); // Örneðin "2x/3x"
 
-                    // Slash üzerinden parçalama
-                    // "2x/3x" => ["2x", "3x"]
-                    string[] parts = quantityText.Split('/');
+            //        // Slash üzerinden parçalama
+            //        // "2x/3x" => ["2x", "3x"]
+            //        string[] parts = quantityText.Split('/');
 
-                    int quantityDrawn = 0;
-                    int quantityMirror = 0;
+            //        int quantityDrawn = 0;
+            //        int quantityMirror = 0;
 
-                    // parts[0] = "2x" => quantityDrawn
-                    if (parts.Length > 0)
-                    {
-                        quantityDrawn = parseQuantityHelper.ParseQuantity(parts[0]);
-                    }
+            //        // parts[0] = "2x" => quantityDrawn
+            //        if (parts.Length > 0)
+            //        {
+            //            quantityDrawn = parseQuantityHelper.ParseQuantity(parts[0]);
+            //        }
 
-                    // parts[1] = "3x" => quantityMirror
-                    if (parts.Length > 1)
-                    {
-                        quantityMirror = parseQuantityHelper.ParseQuantity(parts[1]);
-                    }
+            //        // parts[1] = "3x" => quantityMirror
+            //        if (parts.Length > 1)
+            //        {
+            //            quantityMirror = parseQuantityHelper.ParseQuantity(parts[1]);
+            //        }
 
-                    _catiaComponents.Add(new ComponentItem
-                    {
-                        ItemNo = int.Parse(itemNo),// todo hata verebilir.
-                        QuantityDrawn = quantityDrawn,
-                        QuantityMirror = quantityMirror
-                    });
-                }
-            }
+            //        _catiaComponents.Add(new ComponentItem
+            //        {
+            //            ItemNo = int.Parse(itemNo),// todo hata verebilir.
+            //            QuantityDrawn = quantityDrawn,
+            //            QuantityMirror = quantityMirror
+            //        });
+            //    }
+            //}
         }
         #endregion
         #region Button3 Click Handlers
@@ -225,15 +225,10 @@ namespace CATIAAssistant
             InformationLabel.Text = "";
             ActiveExcelLabel.ForeColor = Color.Black;
             var validationHelper = new ValidationHelper();
-            if (!validationHelper.ValidateDrawingDocument(_docType))
+            if (_catia == null)
             {
-                InformationLabel.Text = "Type of this document is not \"Drawing\"";
+                InformationLabel.Text = "No document found";
                 dataGridView1.Rows.Clear();
-                return;
-            }
-            if (_catiaComponents.Count == 0)
-            {
-                InformationLabel.Text = "Read components first";
                 return;
             }
 
