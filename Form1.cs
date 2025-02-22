@@ -76,7 +76,7 @@ namespace CATIAAssistant
 
             try
             {
-            _activeDoc = docHelper.GetActiveDocument();
+                _activeDoc = docHelper.GetActiveDocument();
             }
             catch (Exception)
             {
@@ -207,7 +207,7 @@ namespace CATIAAssistant
                 dataGridView1.Rows.Clear();
                 return;
             }
-            
+
             CatiaDocumentHelper docHelper = new CatiaDocumentHelper(_catia);
             if (docHelper.GetDocumentsCount() == 0)
             {
@@ -231,9 +231,9 @@ namespace CATIAAssistant
             ActiveDocumentLabel.ForeColor = Color.Black;
             ActiveDocumentLabel.Text = _activeDoc.get_Name();
 
-            ProductDocumentService productDocumentService = new ProductDocumentService(_productDoc);
-            List<ProductParameter> productParameters = new List<ProductParameter>();
-            productDocumentService.GetProductParameterValues();
+            ProductDocumentService productDocumentService = new ProductDocumentService();
+            productDocumentService.GetParameterValuesFromProduct(_productDoc.Product,string.Empty,isZSBCheckBox.Checked);
+            List<ProductParameter> productParameters = productDocumentService.productParameters;
 
             // Excel BOM dosya yolu
             string documentExtensionName = _activeDoc.get_Name().Split('.')[1];
