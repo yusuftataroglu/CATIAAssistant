@@ -1,4 +1,5 @@
-﻿using DRAFTINGITF;
+﻿using CATIAAssistant.Models;
+using DRAFTINGITF;
 using INFITF;
 using ProductStructureTypeLib;
 
@@ -9,6 +10,11 @@ namespace CATIAAssistant.Helpers
         private ProductDocument _productDocument;
 
         public ProductDocument ProductDocument { get => _productDocument; set => _productDocument = value; }
+
+
+       
+
+
         /// <summary>
         /// Dokümanın bir DrawingDocument olup olmadığını kontrol eder.
         /// </summary>

@@ -5,6 +5,7 @@ using CATIAAssistant.Services;
 using DRAFTINGITF;
 using INFITF;
 using Microsoft.VisualBasic;
+using ProductStructureTypeLib;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CATIAAssistant
@@ -18,6 +19,7 @@ namespace CATIAAssistant
         private MECMOD.PartDocument _partDoc;
         private DRAFTINGITF.DrawingDocument _drawingDoc;
         private List<ProductParameter> _catiaComponents = new List<ProductParameter>();
+        private COMService _comService = new COMService();
 
         public Form1()
         {
@@ -28,7 +30,9 @@ namespace CATIAAssistant
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            TopMost = true;
+            checkBoxAlwaysOnTop.Checked = false;
+            TopMost = false;
+            isZSBCheckBox.Checked = true;
             InformationLabel.Text = "";
             // Sabit metin: "Active document:" kısmı her zaman görünür
             ActiveDocumentPrefixLabel.Text = "Active Catia Doc:";
@@ -46,110 +50,169 @@ namespace CATIAAssistant
         private void button1_Click(object sender, EventArgs e)
         {
             // Temizleme işlemleri
+            ActiveExcelLabel.Text = "";
             ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
 
-            // Catia bağlantısı
-            var comService = new COMService();
+            CatiaDocResult catiaDocResult;
             try
             {
-                _catia = (INFITF.Application)comService.GetActiveObject("CATIA.Application");
+                _catia = (INFITF.Application)_comService.GetActiveObject("CATIA.Application");
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "CATIA application cannot be found";
+                ActiveDocumentLabel.Text = ex.Message;
                 return;
             }
-
-            // Yeni bir CatiaDocumentHelper oluşturuyoruz.
             var docHelper = new CatiaDocumentHelper(_catia);
-
-            // Doküman sayısını kontrol ediyoruz.
-            if (docHelper.GetDocumentsCount() == 0)
-            {
-                ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "No document found";
-                return;
-            }
-
             try
             {
-                _activeDoc = docHelper.GetActiveDocument();
+                catiaDocResult = docHelper.DoInitializeDocument();
+
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "No active document found";
+                ActiveDocumentLabel.Text = ex.Message;
                 return;
             }
-
-            // Doküman adını siyah renkle ekliyoruz.
-            ActiveDocumentLabel.ForeColor = Color.Black;
-            ActiveDocumentLabel.Text = $"{_activeDoc.get_Name()}";
-
+            // Buraya geldiyse aktif doküman vardır.
             // Doküman türünü alıyoruz.
-            _docType = docHelper.GetDocumentType(_activeDoc);
+            _docType = catiaDocResult.DocType;
+            _drawingDoc = catiaDocResult.DrawingDoc;
+            _productDoc = catiaDocResult.ProductDoc;
+            _partDoc = catiaDocResult.PartDoc;
+            _activeDoc = catiaDocResult.ActiveDoc;
 
-            // Doküman türüne göre ilgili nesneyi set ediyoruz.
-            if (_docType == "DrawingDocument")
-            {
-                _drawingDoc = (DRAFTINGITF.DrawingDocument)_activeDoc;
-            }
-            else if (_docType == "ProductDocument")
-            {
-                _productDoc = (ProductStructureTypeLib.ProductDocument)_activeDoc;
-            }
-            else if (_docType == "PartDocument")
-            {
-                _partDoc = (MECMOD.PartDocument)_activeDoc;
-            }
-            else
-            {
-                ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "Document type is not supported";
-                return;
-            }
+            ActiveDocumentLabel.Text = _activeDoc.get_Name();
+            ActiveDocumentLabel.ForeColor = Color.Black;
         }
+
         #endregion
         #region Button2 Click Handlers
         // Button2: DrawingDocument içindeki component'lardan metin verilerini DataGridView'e aktar.
         private void button2_Click(object sender, EventArgs e)
         {
+            ActiveExcelLabel.Text = "";
+            ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
+
+            CatiaDocResult catiaDocResult;
+            try
+            {
+                _catia = (INFITF.Application)_comService.GetActiveObject("CATIA.Application");
+
+            }
+            catch (Exception ex)
+            {
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = ex.Message;
+                return;
+            }
+            var docHelper = new CatiaDocumentHelper(_catia);
+            try
+            {
+                catiaDocResult = docHelper.DoInitializeDocument();
+            }
+            catch (Exception ex)
+            {
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = ex.Message;
+                return;
+            }
+            if (_activeDoc is null)
+            {
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = "Read document first";
+                return;
+            }
+            Document newActive = catiaDocResult.ActiveDoc;
+
+            if (!Equals(newActive, _activeDoc))
+            {
+                DialogResult dialogResult = MessageBox.Show("You are now on different document than current active document. Do you want to update active document?", "Update Document", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                // Kullanıcı mesaj kutusundaki butonlardan birine tıklamadan önce catia'yı/dokümanı kapatmış olabilir. Bunun kontrolünü yapıyoruz.
+                try
+                {
+                    _catia = (INFITF.Application)_comService.GetActiveObject("CATIA.Application");
+
+                }
+                catch (Exception ex)
+                {
+                    ActiveDocumentLabel.ForeColor = Color.Red;
+                    ActiveDocumentLabel.Text = ex.Message;
+                    return;
+                }
+                docHelper = new CatiaDocumentHelper(_catia);
+                try
+                {
+                    catiaDocResult = docHelper.DoInitializeDocument();
+                }
+                catch (Exception ex)
+                {
+                    ActiveDocumentLabel.ForeColor = Color.Red;
+                    ActiveDocumentLabel.Text = ex.Message;
+                    return;
+                }
+                if (dialogResult == DialogResult.Yes)
+                {
+                    // Kullanıcı Yes'e basmışsa aktif doküman güncelleniyor.
+                    _activeDoc = catiaDocResult.ActiveDoc;
+                    _docType = catiaDocResult.DocType;
+                    _drawingDoc = catiaDocResult.DrawingDoc;
+                    _productDoc = catiaDocResult.ProductDoc;
+                    _partDoc = catiaDocResult.PartDoc;
+                }
+            }
+
+            ActiveDocumentLabel.Text = _activeDoc.get_Name();
+            ActiveDocumentLabel.ForeColor = Color.Black;
+
             var validationHelper = new ValidationHelper();
             if (!validationHelper.ValidateDrawingDocument(_docType))
             {
-                InformationLabel.Text = "Type of this document is not \"Drawing\"";
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = "Type of this document is not \"Drawing\"";
                 return;
             }
 
             if (!validationHelper.ValidateSheetsCount(_drawingDoc))
             {
-                InformationLabel.Text = "No sheet found in this drawing";
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = "No sheet found in this drawing";
                 return;
             }
 
             if (!validationHelper.ValidateDetailSheet(_drawingDoc))
             {
-                InformationLabel.Text = "Can not read component datas in detail sheet";
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = "Can not read component datas in detail sheet";
                 return;
             }
 
             if (!validationHelper.ValidateActiveSheetViewsCount(_drawingDoc))
             {
-                InformationLabel.Text = "No view found in the active sheet";
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = "No view found in the active sheet";
                 return;
             }
             if (!validationHelper.ValidateActiveView(_drawingDoc))
             {
-                InformationLabel.Text = "No active view found in the active sheet";
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = "No active view found in the active sheet";
                 return;
             }
 
@@ -161,16 +224,18 @@ namespace CATIAAssistant
             }
             catch (Exception ex)
             {
-                InformationLabel.Text = ex.Message;
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = ex.Message;
                 return;
             }
 
             // Eğer component'larda okunacak veri yoksa dataRows.Count = 0 oluyor ve boşuna devam etmesini önlüyoruz.
             if (dataRows.Count == 0)
             {
-                InformationLabel.Text = "No readable text found in components of active view";
                 dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                InformationLabel.Text = "No readable text found in components of active view";
                 return;
             }
 
@@ -193,49 +258,101 @@ namespace CATIAAssistant
         #region Button3 Click Handlers
         private void button3_Click(object sender, EventArgs e)
         {
-            // Catia bağlantısı
-            var comService = new COMService();
+            ActiveExcelLabel.Text = "";
+            ActiveDocumentLabel.Text = "";
+            InformationLabel.Text = "";
+
+            CatiaDocResult catiaDocResult;
             try
             {
-                _catia = (INFITF.Application)comService.GetActiveObject("CATIA.Application");
+                _catia = (INFITF.Application)_comService.GetActiveObject("CATIA.Application");
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "CATIA application cannot be found";
                 dataGridView1.Rows.Clear();
-                return;
-            }
-
-            CatiaDocumentHelper docHelper = new CatiaDocumentHelper(_catia);
-            if (docHelper.GetDocumentsCount() == 0)
-            {
-                ActiveDocumentLabel.ForeColor = Color.Red;
-                ActiveDocumentLabel.Text = "No document found";
-                return;
-            }
-            try
-            {
-                docHelper.GetActiveDocument();
-            }
-            catch (Exception ex)
-            {
-                InformationLabel.Text = ex.Message;
-            }
-
-            var validationHelper = new ValidationHelper();
-            try
-            {
-                _productDoc = validationHelper.GetProductDocument(_catia, _activeDoc);
-            }
-            catch (Exception ex)
-            {
+                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = ex.Message;
                 return;
             }
+            var docHelper = new CatiaDocumentHelper(_catia);
+            try
+            {
+                catiaDocResult = docHelper.DoInitializeDocument();
+            }
+            catch (Exception ex)
+            {
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = ex.Message;
+                return;
+            }
+            if (_activeDoc is null)
+            {
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                ActiveDocumentLabel.ForeColor = Color.Red;
+                ActiveDocumentLabel.Text = "Read document first";
+                return;
+            }
+            Document newActive = catiaDocResult.ActiveDoc;
 
+            if (!Equals(newActive, _activeDoc))
+            {
+                DialogResult dialogResult = MessageBox.Show("You are now on different document than current active document. Do you want to update active document?", "Update Document", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                // Kullanıcı mesaj kutusundaki butonlardan birine tıklamadan önce catia'yı/dokümanı kapatmış olabilir. Bunun kontrolünü yapıyoruz.
+                try
+                {
+                    _catia = (INFITF.Application)_comService.GetActiveObject("CATIA.Application");
+
+                }
+                catch (Exception ex)
+                {
+                    ActiveDocumentLabel.ForeColor = Color.Red;
+                    ActiveDocumentLabel.Text = ex.Message;
+                    return;
+                }
+                docHelper = new CatiaDocumentHelper(_catia);
+                try
+                {
+                    catiaDocResult = docHelper.DoInitializeDocument();
+                }
+                catch (Exception ex)
+                {
+                    ActiveDocumentLabel.ForeColor = Color.Red;
+                    ActiveDocumentLabel.Text = ex.Message;
+                    return;
+                }
+                if (dialogResult == DialogResult.Yes)
+                {
+                    // Kullanıcı Yes'e basmışsa aktif doküman güncelleniyor.
+                    _activeDoc = catiaDocResult.ActiveDoc;
+                    _docType = catiaDocResult.DocType;
+                    _drawingDoc = catiaDocResult.DrawingDoc;
+                    _productDoc = catiaDocResult.ProductDoc;
+                    _partDoc = catiaDocResult.PartDoc;
+                }
+            }
+
+            ActiveDocumentLabel.Text = _activeDoc.get_Name();
+            ActiveDocumentLabel.ForeColor = Color.Black;
+
+            var validationHelper = new ValidationHelper();
+            if (_docType != "ProductDocument")
+            {
+                try
+                {
+                    _productDoc = validationHelper.GetProductDocument(_catia, _activeDoc);
+                }
+                catch (Exception ex)
+                {
+                    ActiveDocumentLabel.ForeColor = Color.Red;
+                    ActiveDocumentLabel.Text = ex.Message;
+                    return;
+                }
+            }
             ActiveDocumentLabel.ForeColor = Color.Black;
             ActiveDocumentLabel.Text = _activeDoc.get_Name();
 
@@ -281,7 +398,6 @@ namespace CATIAAssistant
             }
         }
         #endregion
-
         #region DataGridView Sum of Selected Cell Values
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
@@ -301,7 +417,6 @@ namespace CATIAAssistant
             InformationLabel.Text = $"Sum: {totalDrawn}x/{totalMirror}x";
         }
         #endregion
-
         #region Other UI Handlers
         private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)
         {

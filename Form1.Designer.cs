@@ -66,8 +66,6 @@
             // 
             checkBoxAlwaysOnTop.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             checkBoxAlwaysOnTop.AutoSize = true;
-            checkBoxAlwaysOnTop.Checked = true;
-            checkBoxAlwaysOnTop.CheckState = CheckState.Checked;
             checkBoxAlwaysOnTop.Location = new Point(7, 28);
             checkBoxAlwaysOnTop.Name = "checkBoxAlwaysOnTop";
             checkBoxAlwaysOnTop.Size = new Size(129, 24);

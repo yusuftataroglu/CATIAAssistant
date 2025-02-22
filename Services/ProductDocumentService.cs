@@ -74,6 +74,7 @@ namespace CATIAAssistant.Services
             }
         }
 
+        // Ortak işlemler
         private bool ExtractParametersFromProduct(Product child, string childPath)
         {
             string name = "";

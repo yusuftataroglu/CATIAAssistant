@@ -20,14 +20,15 @@ namespace CATIAAssistant.Services
             try
             {
                 CLSIDFromProgIDEx(progID, out clsid);
+                GetActiveObject(ref clsid, IntPtr.Zero, out obj);
             }
             //            catch
             catch (Exception)
             {
                 CLSIDFromProgID(progID, out clsid);
+                throw new Exception("CATIA application cannot be found");
             }
 
-            GetActiveObject(ref clsid, IntPtr.Zero, out obj);
             return obj;
         }
 
