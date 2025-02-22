@@ -3,6 +3,7 @@
     public class ProductParameter
     {
         public string ItemNo { get; set; }
+        public int Quantity { get; set; } = 1;
         public string Name { get; set; }
         public string Supplier { get; set; }
         public string OrderNo { get; set; }
@@ -14,7 +15,7 @@
         public string Length { get; set; }
         public string SparePart { get; set; }
         public string Comment { get; set; }
-        public string Info { get; set; } 
+        public string Info { get; set; }
     }
 }
 

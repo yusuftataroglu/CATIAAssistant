@@ -215,6 +215,14 @@ namespace CATIAAssistant
                 ActiveDocumentLabel.Text = "No document found";
                 return;
             }
+            try
+            {
+                docHelper.GetActiveDocument();
+            }
+            catch (Exception ex)
+            {
+                InformationLabel.Text = ex.Message;
+            }
 
             var validationHelper = new ValidationHelper();
             try
@@ -232,7 +240,7 @@ namespace CATIAAssistant
             ActiveDocumentLabel.Text = _activeDoc.get_Name();
 
             ProductDocumentService productDocumentService = new ProductDocumentService();
-            productDocumentService.GetParameterValuesFromProduct(_productDoc.Product,string.Empty,isZSBCheckBox.Checked);
+            productDocumentService.GetParameterValuesFromProduct(_productDoc.Product, string.Empty, isZSBCheckBox.Checked);
             List<ProductParameter> productParameters = productDocumentService.productParameters;
 
             // Excel BOM dosya yolu

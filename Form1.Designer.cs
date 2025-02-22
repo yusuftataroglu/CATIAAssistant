@@ -215,6 +215,8 @@
             // isZSBCheckBox
             // 
             isZSBCheckBox.AutoSize = true;
+            isZSBCheckBox.Checked = true;
+            isZSBCheckBox.CheckState = CheckState.Checked;
             isZSBCheckBox.Location = new Point(3, 66);
             isZSBCheckBox.Name = "isZSBCheckBox";
             isZSBCheckBox.Size = new Size(57, 24);
