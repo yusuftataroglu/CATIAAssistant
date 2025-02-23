@@ -98,6 +98,9 @@ namespace CATIAAssistant
             ActiveExcelLabel.Text = "";
             ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
+            dataGridView1.DataSource = null;
+            dataGridView1.Rows.Clear();
+            dataGridView1.Columns.Clear();
 
             CatiaDocResult catiaDocResult;
             try
@@ -107,8 +110,6 @@ namespace CATIAAssistant
             }
             catch (Exception ex)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = ex.Message;
                 return;
@@ -120,16 +121,12 @@ namespace CATIAAssistant
             }
             catch (Exception ex)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = ex.Message;
                 return;
             }
             if (_activeDoc is null)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = "Read document first";
                 return;
@@ -147,8 +144,6 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
-                    dataGridView1.Rows.Clear();
-                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -160,8 +155,6 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
-                    dataGridView1.Rows.Clear();
-                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -183,39 +176,29 @@ namespace CATIAAssistant
             var validationHelper = new ValidationHelper();
             if (!validationHelper.ValidateDrawingDocument(_docType))
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = "Type of this document is not \"Drawing\"";
                 return;
             }
 
             if (!validationHelper.ValidateSheetsCount(_drawingDoc))
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = "No sheet found in this drawing";
                 return;
             }
 
             if (!validationHelper.ValidateDetailSheet(_drawingDoc))
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = "Can not read component datas in detail sheet";
                 return;
             }
 
             if (!validationHelper.ValidateActiveSheetViewsCount(_drawingDoc))
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = "No view found in the active sheet";
                 return;
             }
             if (!validationHelper.ValidateActiveView(_drawingDoc))
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = "No active view found in the active sheet";
                 return;
             }
@@ -228,8 +211,6 @@ namespace CATIAAssistant
             }
             catch (Exception ex)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = ex.Message;
                 return;
             }
@@ -237,8 +218,6 @@ namespace CATIAAssistant
             // Eğer component'larda okunacak veri yoksa dataRows.Count = 0 oluyor ve boşuna devam etmesini önlüyoruz.
             if (dataRows.Count == 0)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 InformationLabel.Text = "No readable text found in components of active view";
                 return;
             }
@@ -246,12 +225,10 @@ namespace CATIAAssistant
             // Eğer component'larda okunacak veri varsa DataGridView sütunlarını, en fazla veri içeren satırın uzunluğuna göre sabitliyoruz.
             int columnCount = dataRows[0].Length;
 
-            dataGridView1.Columns.Clear();
             for (int i = 0; i < columnCount; i++)
             {
                 dataGridView1.Columns.Add($"Column{i + 1}", $"Column{i + 1}");
             }
-            dataGridView1.Rows.Clear();
             foreach (var row in dataRows)
             {
                 dataGridView1.Rows.Add(row);
@@ -265,6 +242,9 @@ namespace CATIAAssistant
             ActiveExcelLabel.Text = "";
             ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
+            dataGridView1.DataSource = null;
+            dataGridView1.Rows.Clear();
+            dataGridView1.Columns.Clear();
 
             CatiaDocResult catiaDocResult;
             try
@@ -274,8 +254,6 @@ namespace CATIAAssistant
             }
             catch (Exception ex)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = ex.Message;
                 return;
@@ -287,16 +265,12 @@ namespace CATIAAssistant
             }
             catch (Exception ex)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = ex.Message;
                 return;
             }
             if (_activeDoc is null)
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Columns.Clear();
                 ActiveDocumentLabel.ForeColor = Color.Red;
                 ActiveDocumentLabel.Text = "Read document first";
                 return;
@@ -314,8 +288,6 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
-                    dataGridView1.Rows.Clear();
-                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -327,8 +299,6 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
-                    dataGridView1.Rows.Clear();
-                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -353,8 +323,6 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
-                    dataGridView1.Rows.Clear();
-                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -363,7 +331,7 @@ namespace CATIAAssistant
             ActiveDocumentLabel.ForeColor = Color.Black;
             ActiveDocumentLabel.Text = _activeDoc.get_Name();
 
-            
+
 
             //Excel BOM dosya yolu
             string documentExtensionName = _activeDoc.get_Name().Split('.')[1];
@@ -392,8 +360,38 @@ namespace CATIAAssistant
                 productDocumentService.GetParameterValuesFromProduct(_productDoc.Product, string.Empty, isZSBCheckBox.Checked);
                 List<ProductParameter> productParameters = productDocumentService.productParameters;
 
-                // Product parametre verilerini DataGridView'da gösteriyoruz
+                // Sütun oluşturma (örnek)
+                dataGridView1.Columns.Add("ItemNo", "Item No");
+                dataGridView1.Columns.Add("Quantity", "Quantity");
+                dataGridView1.Columns.Add("Name", "Name");
+                dataGridView1.Columns.Add("Supplier", "Supplier");
+                dataGridView1.Columns.Add("OrderNo", "OrderNo No");
+                dataGridView1.Columns.Add("TypeNo", "TypeNo");
+                dataGridView1.Columns.Add("CustomerOrderNo", "CustomerOrderNo");
+                dataGridView1.Columns.Add("Material", "Material");
+                dataGridView1.Columns.Add("Dimensions", "Dimensions");
+                dataGridView1.Columns.Add("Length", "Length");
+                dataGridView1.Columns.Add("SparePart", "SparePart");
+                dataGridView1.Columns.Add("Comment", "Comment");
 
+                // Satır ekleme
+                foreach (var param in productParameters)
+                {
+                    dataGridView1.Rows.Add(
+                        param.ItemNo,
+                        $"{param.Quantity}x",
+                        param.Name,
+                        param.Supplier,
+                        param.OrderNo,
+                        param.TypeNo,
+                        param.CustomerOrderNo,
+                        $"{param.MaterialNo}/{param.MaterialName}",
+                        param.Dimensions,
+                        param.Length,
+                        param.SparePart,
+                        $"{param.Comment} / {param.Info}"
+                    );
+                }
                 // Karşılaştırma
                 //ComparisonHelper comparisonHelper = new();
                 //comparisonHelper.CompareCatiaAndBom(productParameters, bomItems);

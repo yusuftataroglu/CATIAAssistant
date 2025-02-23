@@ -64,8 +64,8 @@ namespace Catia_Macro_Test.Services
                 {
                     // Bu satır dolu, veri çekilecek.
                     string itemNo = (usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string quantityDrawn = (usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString()?.Trim().Trim('x') ?? "";
-                    string quantityMirror = (usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString()?.Trim().Trim('x') ?? "";
+                    string quantityDrawn = (usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string quantityMirror = (usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
                     string description = (usedRange.Cells[row, 5] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
                     string manufacturer = (usedRange.Cells[row, 6] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
                     string orderNo = (usedRange.Cells[row, 7] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
@@ -101,15 +101,25 @@ namespace Catia_Macro_Test.Services
 
         public void Quit()
         {
-            if (Workbook != null)
+            try
             {
-                Marshal.ReleaseComObject(Workbook);
+                while (Marshal.ReleaseComObject(ExcelApp) > 0) ;
             }
-            if (ExcelApp != null)
+            catch { }
+            finally
             {
-                ExcelApp.Quit();
-                Marshal.ReleaseComObject(ExcelApp);
+                ExcelApp = null;
             }
+
+            //while (Marshal.ReleaseComObject(Workbook)>0)
+            //{
+
+            //}
+            //if (ExcelApp != null)
+            //{
+            //    ExcelApp.Quit();
+            //    Marshal.ReleaseComObject(ExcelApp);
+            //}
         }
 
         public void Dispose()
