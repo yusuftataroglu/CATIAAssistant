@@ -2,10 +2,8 @@
 using CATIAAssistant.Helpers;
 using CATIAAssistant.Models;
 using CATIAAssistant.Services;
-using DRAFTINGITF;
 using INFITF;
-using Microsoft.VisualBasic;
-using ProductStructureTypeLib;
+using System.Security.Cryptography;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace CATIAAssistant
@@ -50,7 +48,6 @@ namespace CATIAAssistant
         private void button1_Click(object sender, EventArgs e)
         {
             // Temizleme işlemleri
-            ActiveExcelLabel.Text = "";
             ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
 
@@ -359,13 +356,14 @@ namespace CATIAAssistant
                 ProductDocumentService productDocumentService = new ProductDocumentService();
                 productDocumentService.GetParameterValuesFromProduct(_productDoc.Product, string.Empty, isZSBCheckBox.Checked);
                 List<ProductParameter> productParameters = productDocumentService.productParameters;
+                Dictionary<string, ProductParameter> dict = productDocumentService._dict;
 
                 // Sütun oluşturma (örnek)
                 dataGridView1.Columns.Add("ItemNo", "Item No");
                 dataGridView1.Columns.Add("Quantity", "Quantity");
                 dataGridView1.Columns.Add("Name", "Name");
                 dataGridView1.Columns.Add("Supplier", "Supplier");
-                dataGridView1.Columns.Add("OrderNo", "OrderNo No");
+                dataGridView1.Columns.Add("OrderNo", "OrderNo");
                 dataGridView1.Columns.Add("TypeNo", "TypeNo");
                 dataGridView1.Columns.Add("CustomerOrderNo", "CustomerOrderNo");
                 dataGridView1.Columns.Add("Material", "Material");
@@ -373,10 +371,50 @@ namespace CATIAAssistant
                 dataGridView1.Columns.Add("Length", "Length");
                 dataGridView1.Columns.Add("SparePart", "SparePart");
                 dataGridView1.Columns.Add("Comment", "Comment");
+                dataGridView1.Columns.Add("ChildPath", "ChildPath");
+                dataGridView1.Columns["ChildPath"].Visible = false;
 
                 // Satır ekleme
                 foreach (var param in productParameters)
                 {
+                    string sparePart;
+                    // Bom listesindeki gösterime uygun hale getiriyoruz.
+                    switch (param.SparePart)
+                    {
+                        case "S":
+                            sparePart = "SPARE PART";
+                            break;
+                        case "W":
+                            sparePart = "WEAR PART";
+                            break;
+                        default:
+                            sparePart = "";
+                            break;
+                    }
+                    string material = "";
+                    if (!string.IsNullOrWhiteSpace(param.MaterialName) || !string.IsNullOrWhiteSpace(param.MaterialName) || !string.IsNullOrWhiteSpace(param.MaterialNo) || !string.IsNullOrWhiteSpace(param.MaterialNo))
+                    {
+                        material = $"{param.MaterialNo}/{param.MaterialName}";
+                    }
+                    string length = param.Length;
+                    if (string.IsNullOrWhiteSpace(length) || !string.IsNullOrWhiteSpace(length))
+                    {
+                        length = param.ProfileLength;
+                    }
+                    string comment = "";
+                    if ((!string.IsNullOrWhiteSpace(param.Comment) || !string.IsNullOrWhiteSpace(param.Comment)) && (!string.IsNullOrWhiteSpace(param.Info) || !string.IsNullOrWhiteSpace(param.Info)))
+                    {
+                        comment = $"{param.Comment} / {param.Info}";
+                    }
+                    else if ((!string.IsNullOrWhiteSpace(param.Comment) || !string.IsNullOrWhiteSpace(param.Comment)) && (string.IsNullOrWhiteSpace(param.Info) || string.IsNullOrWhiteSpace(param.Info)))
+                    {
+                        comment = $"{param.Comment}";
+                    }
+                    else if(string.IsNullOrWhiteSpace(param.Comment) || string.IsNullOrWhiteSpace(param.Comment))
+                    {
+                        comment = "";
+                    }
+
                     dataGridView1.Rows.Add(
                         param.ItemNo,
                         $"{param.Quantity}x",
@@ -385,21 +423,23 @@ namespace CATIAAssistant
                         param.OrderNo,
                         param.TypeNo,
                         param.CustomerOrderNo,
-                        $"{param.MaterialNo}/{param.MaterialName}",
+                        material,
                         param.Dimensions,
-                        param.Length,
-                        param.SparePart,
-                        $"{param.Comment} / {param.Info}"
+                        length,
+                        sparePart,
+                        comment,
+                        param.ChildPath
                     );
                 }
+                SetRowNumber(dataGridView1);
+
                 // Karşılaştırma
-                //ComparisonHelper comparisonHelper = new();
-                //comparisonHelper.CompareCatiaAndBom(productParameters, bomItems);
+                ComparisonHelper comparisonHelper = new();
+                comparisonHelper.CompareCatiaAndBom(dict, bomItems, dataGridView1, isZSBCheckBox.Checked);
             }
         }
         #endregion
         #region DataGridView Row Numbering
-
         private void dataGridView1_Sorted(object sender, EventArgs e)
         {
             SetRowNumber(dataGridView1);
@@ -419,18 +459,30 @@ namespace CATIAAssistant
             int totalDrawn = 0;
             int totalMirror = 0;
 
+            // Bir HashSet ile satır indekslerini saklayacağız
+            HashSet<int> selectedRowIndices = new HashSet<int>();
+
             foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
             {
                 if (cell.Value is string cellValue)
                 {
+                    // Quantity toplama mantığı
                     var (drawn, mirror) = new ParseQuantityHelper().ParseDrawnMirror(cellValue);
                     totalDrawn += drawn;
                     totalMirror += mirror;
                 }
+
+                // Satır indeksini ekliyoruz
+                selectedRowIndices.Add(cell.RowIndex);
             }
 
-            InformationLabel.Text = $"Sum: {totalDrawn}x/{totalMirror}x";
+            // Seçilen satır sayısı, HashSet'in eleman sayısı
+            int rowCount = selectedRowIndices.Count;
+
+            // InformationLabel’da hem seçilen satır sayısını hem sum değerini gösteriyoruz
+            InformationLabel.Text = $"Number: {rowCount}   Sum: {totalDrawn}x/{totalMirror}x";
         }
+
         #endregion
         #region Other UI Handlers
         private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)

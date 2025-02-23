@@ -6,7 +6,7 @@ namespace CATIAAssistant.Services
     public class ProductDocumentService
     {
         // Bu HashSet, "fullPath_itemNo" keylerini saklayarak duplicate kontrolü yapar
-        private Dictionary<string, ProductParameter> _dict = new Dictionary<string, ProductParameter>();
+        public Dictionary<string, ProductParameter> _dict = new Dictionary<string, ProductParameter>();
 
         // Sonuç listesini buraya ekleyeceğiz
         public List<ProductParameter> productParameters { get; set; }
@@ -80,7 +80,6 @@ namespace CATIAAssistant.Services
             string name = "";
             string itemNo = "";
             string description = "";
-
             string supplier = "";
             string orderNo = "";
             string typeNo = "";
@@ -89,10 +88,11 @@ namespace CATIAAssistant.Services
             string materialNo = "";
             string dimensions = "";
             string length = "";
+            string profileLength = "";
             string sparePart = "";
             string comment = "";
             string info = "";
-            string key = childPath + "_" + itemNo;
+            string key = childPath;
 
             try
             {
@@ -103,18 +103,19 @@ namespace CATIAAssistant.Services
             catch (Exception)
             {
             }
+            bool isChecked = false;
             try
             {
                 itemNo = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\ITEM_NO").ValueAsString().Trim();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ex.Source = child.get_Name();
                 // ItemNo yok ise Description'a bak.
                 description = child.get_DescriptionInst().Trim();
                 itemNo = description;
+                isChecked = true;
             }
-            if (string.IsNullOrEmpty(itemNo) || string.IsNullOrWhiteSpace(itemNo))
+            if (!isChecked && (string.IsNullOrEmpty(itemNo) || string.IsNullOrWhiteSpace(itemNo)))
             {
                 // ItemNo var ama boş ise Description'a bak.
                 description = child.get_DescriptionInst().Trim();
@@ -137,6 +138,7 @@ namespace CATIAAssistant.Services
                 materialNo = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\MATERIAL_NO").ValueAsString().Trim();
                 dimensions = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\STOCK_DIM").ValueAsString().Trim();
                 length = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\LENGTH").ValueAsString().Trim();
+                profileLength = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\PROFILE_LENGTH").ValueAsString().Trim();
                 sparePart = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\SPARE_WEAR_PART").ValueAsString().Trim();
                 comment = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\COMMENT").ValueAsString().Trim();
                 info = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\ADD_INFO").ValueAsString().Trim();
@@ -158,9 +160,11 @@ namespace CATIAAssistant.Services
                 MaterialNo = materialNo,
                 Dimensions = dimensions,
                 Length = length,
+                ProfileLength = profileLength,
                 SparePart = sparePart,
                 Comment = comment,
                 Info = info,
+                ChildPath = childPath
             };
             return false;
         }

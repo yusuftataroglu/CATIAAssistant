@@ -1,6 +1,5 @@
-﻿using CATIAAssistant.Helpers;
-using CATIAAssistant.Models;
-using System.Runtime.InteropServices;
+﻿using CATIAAssistant.Models;
+using Microsoft.Office.Interop.Excel;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Catia_Macro_Test.Services
@@ -25,7 +24,7 @@ namespace Catia_Macro_Test.Services
             {
                 ExcelApp.Visible = visible;
                 ExcelApp.DisplayAlerts = false;
-                Workbook = ExcelApp.Workbooks.Open(path);
+                Workbook = ExcelApp.Workbooks.Open(path, ReadOnly: true);
                 Workbook.Activate();
                 Worksheet = Workbook.ActiveSheet as Excel.Worksheet;
             }
@@ -63,19 +62,19 @@ namespace Catia_Macro_Test.Services
                 if (!isRowEmpty)
                 {
                     // Bu satır dolu, veri çekilecek.
-                    string itemNo = (usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string quantityDrawn = (usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string quantityMirror = (usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string description = (usedRange.Cells[row, 5] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string manufacturer = (usedRange.Cells[row, 6] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string orderNo = (usedRange.Cells[row, 7] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string typeNo = (usedRange.Cells[row, 8] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string customerOrderNo = (usedRange.Cells[row, 9] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string materialNo = (usedRange.Cells[row, 11] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string dimensions = (usedRange.Cells[row, 12] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string length = (usedRange.Cells[row, 13] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string sparePart = (usedRange.Cells[row, 16] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
-                    string remark = (usedRange.Cells[row, 17] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string itemNo = (usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string quantityDrawn = (usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string quantityMirror = (usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string description = (usedRange.Cells[row, 5] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string manufacturer = (usedRange.Cells[row, 6] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string orderNo = (usedRange.Cells[row, 7] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string typeNo = (usedRange.Cells[row, 8] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string customerOrderNo = (usedRange.Cells[row, 9] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string materialNo = (usedRange.Cells[row, 11] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string dimensions = (usedRange.Cells[row, 12] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string length = (usedRange.Cells[row, 13] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string sparePart = (usedRange.Cells[row, 16] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
+                    string remark = (usedRange.Cells[row, 17] as Excel.Range)?.Value2?.ToString().Trim() ?? "";
 
                     bomItems.Add(new BomItem
                     {
@@ -101,26 +100,43 @@ namespace Catia_Macro_Test.Services
 
         public void Quit()
         {
+            // Close the workbook
+            if (ExcelApp.Workbooks.Count != 0)
+            {
+                Workbook.Close(SaveChanges: false);
+            }
+
+            // Close the Excel application
+            ExcelApp.Quit();
+
+            // Release the COM object
+            ReleaseObject(Worksheet);
+            ReleaseObject(Workbook);
+            ReleaseObject(ExcelApp);
+        }
+
+        // Release the COM object
+        static void ReleaseObject(object obj)
+        {
             try
             {
-                while (Marshal.ReleaseComObject(ExcelApp) > 0) ;
+                if (obj != null)
+                {
+                    while (System.Runtime.InteropServices.Marshal.ReleaseComObject(obj) > 0) ;
+                    obj = null;
+                }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                obj = null;
+                throw new Exception("Excel application failed to close");
+            }
             finally
             {
-                ExcelApp = null;
+                GC.Collect();
             }
-
-            //while (Marshal.ReleaseComObject(Workbook)>0)
-            //{
-
-            //}
-            //if (ExcelApp != null)
-            //{
-            //    ExcelApp.Quit();
-            //    Marshal.ReleaseComObject(ExcelApp);
-            //}
         }
+
 
         public void Dispose()
         {
