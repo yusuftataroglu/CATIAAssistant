@@ -15,7 +15,7 @@ namespace CATIAAssistant.Services
         {
             productParameters = new List<ProductParameter>();
         }
-
+        #region Get product parameters
         // Ana metot
         public void GetParameterValuesFromProduct(
             Product product,
@@ -164,5 +164,6 @@ namespace CATIAAssistant.Services
             };
             return false;
         }
+        #endregion
     }
 }

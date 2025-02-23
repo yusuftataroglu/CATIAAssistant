@@ -147,6 +147,8 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -158,6 +160,8 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -310,6 +314,8 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -321,6 +327,8 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -336,9 +344,6 @@ namespace CATIAAssistant
                 }
             }
 
-            ActiveDocumentLabel.Text = _activeDoc.get_Name();
-            ActiveDocumentLabel.ForeColor = Color.Black;
-
             var validationHelper = new ValidationHelper();
             if (_docType != "ProductDocument")
             {
@@ -348,6 +353,8 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
                     ActiveDocumentLabel.ForeColor = Color.Red;
                     ActiveDocumentLabel.Text = ex.Message;
                     return;
@@ -356,19 +363,21 @@ namespace CATIAAssistant
             ActiveDocumentLabel.ForeColor = Color.Black;
             ActiveDocumentLabel.Text = _activeDoc.get_Name();
 
-            ProductDocumentService productDocumentService = new ProductDocumentService();
-            productDocumentService.GetParameterValuesFromProduct(_productDoc.Product, string.Empty, isZSBCheckBox.Checked);
-            List<ProductParameter> productParameters = productDocumentService.productParameters;
+            
 
-            // Excel BOM dosya yolu
+            //Excel BOM dosya yolu
             string documentExtensionName = _activeDoc.get_Name().Split('.')[1];
             string excelPath = $"{_activeDoc?.FullName.Replace($".{documentExtensionName}", ".xlsx")}";
             using (var excelService = new ExcelService())
             {
-                if (!excelService.OpenWorkbook(excelPath))
+                try
+                {
+                    excelService.OpenWorkbook(excelPath);
+                }
+                catch (Exception ex)
                 {
                     ActiveExcelLabel.ForeColor = Color.Red;
-                    ActiveExcelLabel.Text = "Excel document cannot be found";
+                    ActiveExcelLabel.Text = ex.Message;
                     return;
                 }
                 ActiveExcelLabel.ForeColor = Color.Black;
@@ -377,9 +386,17 @@ namespace CATIAAssistant
                 Excel.Range usedRange = excelService.GetUsedRange();
                 // Örneğin: satır 14'ten 100'e kadar kontrol edelim.
                 var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
+
+                // Product parametrelerini alıyoruz.
+                ProductDocumentService productDocumentService = new ProductDocumentService();
+                productDocumentService.GetParameterValuesFromProduct(_productDoc.Product, string.Empty, isZSBCheckBox.Checked);
+                List<ProductParameter> productParameters = productDocumentService.productParameters;
+
+                // Product parametre verilerini DataGridView'da gösteriyoruz
+
                 // Karşılaştırma
-                ComparisonHelper comparisonHelper = new();
-                comparisonHelper.CompareCatiaAndBom(productParameters, bomItems);
+                //ComparisonHelper comparisonHelper = new();
+                //comparisonHelper.CompareCatiaAndBom(productParameters, bomItems);
             }
         }
         #endregion

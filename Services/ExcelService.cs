@@ -19,18 +19,19 @@ namespace Catia_Macro_Test.Services
         /// <summary>
         /// Belirtilen yoldaki Excel dosyasını açar.
         /// </summary>
-        public bool OpenWorkbook(string path, bool visible = false)
+        public void OpenWorkbook(string path, bool visible = false)
         {
             try
             {
                 ExcelApp.Visible = visible;
+                ExcelApp.DisplayAlerts = false;
                 Workbook = ExcelApp.Workbooks.Open(path);
+                Workbook.Activate();
                 Worksheet = Workbook.ActiveSheet as Excel.Worksheet;
-                return true;
             }
             catch (Exception)
             {
-                return false;
+                throw new Exception("Excel document cannot be found");
             }
         }
 
@@ -63,6 +64,8 @@ namespace Catia_Macro_Test.Services
                 {
                     // Bu satır dolu, veri çekilecek.
                     string itemNo = (usedRange.Cells[row, 1] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
+                    string quantityDrawn = (usedRange.Cells[row, 3] as Excel.Range)?.Value2?.ToString()?.Trim().Trim('x') ?? "";
+                    string quantityMirror = (usedRange.Cells[row, 4] as Excel.Range)?.Value2?.ToString()?.Trim().Trim('x') ?? "";
                     string description = (usedRange.Cells[row, 5] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
                     string manufacturer = (usedRange.Cells[row, 6] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
                     string orderNo = (usedRange.Cells[row, 7] as Excel.Range)?.Value2?.ToString()?.Trim() ?? "";
@@ -77,6 +80,8 @@ namespace Catia_Macro_Test.Services
                     bomItems.Add(new BomItem
                     {
                         ItemNo = itemNo,
+                        QuantityDrawn = quantityDrawn,
+                        QuantityMirror = quantityMirror,
                         Description = description,
                         Manufacturer = manufacturer,
                         OrderNo = orderNo,
