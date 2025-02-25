@@ -41,7 +41,7 @@ namespace Catia_Macro_Test.Services
         {
             return Worksheet.UsedRange;
         }
-        public List<BomItem> ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow)
+        public List<BomItem> ProcessUsedRange(Excel.Range usedRange, int startRow, int endRow, bool isZSB)
         {
             //int rowCount = usedRange.Rows.Count; Sabit satır sayısı kullanıyoruz.
             int colCount = usedRange.Columns.Count;
@@ -93,6 +93,21 @@ namespace Catia_Macro_Test.Services
                         Remark = remark
                     });
                 }
+            }
+            try
+            {
+                if (isZSB)
+                {
+                    Dictionary<string, BomItem> dict = bomItems.ToDictionary(x => x.CustomerOrderNo);
+                }
+                else
+                {
+                    Dictionary<string, BomItem> dict = bomItems.ToDictionary(x => x.ItemNo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
             return bomItems;
         }

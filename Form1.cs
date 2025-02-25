@@ -95,9 +95,6 @@ namespace CATIAAssistant
             ActiveExcelLabel.Text = "";
             ActiveDocumentLabel.Text = "";
             InformationLabel.Text = "";
-            dataGridView1.DataSource = null;
-            dataGridView1.Rows.Clear();
-            dataGridView1.Columns.Clear();
 
             CatiaDocResult catiaDocResult;
             try
@@ -221,7 +218,8 @@ namespace CATIAAssistant
 
             // Eğer component'larda okunacak veri varsa DataGridView sütunlarını, en fazla veri içeren satırın uzunluğuna göre sabitliyoruz.
             int columnCount = dataRows[0].Length;
-
+            dataGridView1.Rows.Clear();
+            dataGridView1.Columns.Clear();
             for (int i = 0; i < columnCount; i++)
             {
                 dataGridView1.Columns.Add($"Column{i + 1}", $"Column{i + 1}");
@@ -238,8 +236,8 @@ namespace CATIAAssistant
         {
             ActiveExcelLabel.Text = "";
             ActiveDocumentLabel.Text = "";
+            InformationLabel.ForeColor = Color.Black;
             InformationLabel.Text = "";
-            dataGridView1.DataSource = null;
             dataGridView1.Rows.Clear();
             dataGridView1.Columns.Clear();
 
@@ -350,7 +348,17 @@ namespace CATIAAssistant
 
                 Excel.Range usedRange = excelService.GetUsedRange();
                 // Örneğin: satır 14'ten 100'e kadar kontrol edelim.
-                var bomItems = excelService.ProcessUsedRange(usedRange, 14, 100);
+                List<BomItem> bomItems;
+                try
+                {
+                    bomItems = excelService.ProcessUsedRange(usedRange, 14, 100, isZSBCheckBox.Checked);
+                }
+                catch (Exception ex)
+                {
+                    InformationLabel.ForeColor = Color.Red;
+                    InformationLabel.Text = ex.Message;
+                    return;
+                }
 
                 // Product parametrelerini alıyoruz.
                 ProductDocumentService productDocumentService = new ProductDocumentService();
@@ -358,84 +366,22 @@ namespace CATIAAssistant
                 List<ProductParameter> productParameters = productDocumentService.productParameters;
                 Dictionary<string, ProductParameter> dict = productDocumentService._dict;
 
-                // Sütun oluşturma (örnek)
-                dataGridView1.Columns.Add("ItemNo", "Item No");
-                dataGridView1.Columns.Add("Quantity", "Quantity");
-                dataGridView1.Columns.Add("Name", "Name");
-                dataGridView1.Columns.Add("Supplier", "Supplier");
-                dataGridView1.Columns.Add("OrderNo", "OrderNo");
-                dataGridView1.Columns.Add("TypeNo", "TypeNo");
-                dataGridView1.Columns.Add("CustomerOrderNo", "CustomerOrderNo");
-                dataGridView1.Columns.Add("Material", "Material");
-                dataGridView1.Columns.Add("Dimensions", "Dimensions");
-                dataGridView1.Columns.Add("Length", "Length");
-                dataGridView1.Columns.Add("SparePart", "SparePart");
-                dataGridView1.Columns.Add("Comment", "Comment");
-                dataGridView1.Columns.Add("ChildPath", "ChildPath");
-                dataGridView1.Columns["ChildPath"].Visible = false;
+                DGVDesignHelper dgvDesignHelper = new DGVDesignHelper();
+                dgvDesignHelper.OrganizeDGV(dataGridView1, productParameters, dict);
 
-                // Satır ekleme
-                foreach (var param in productParameters)
-                {
-                    string sparePart;
-                    // Bom listesindeki gösterime uygun hale getiriyoruz.
-                    switch (param.SparePart)
-                    {
-                        case "S":
-                            sparePart = "SPARE PART";
-                            break;
-                        case "W":
-                            sparePart = "WEAR PART";
-                            break;
-                        default:
-                            sparePart = "";
-                            break;
-                    }
-                    string material = "";
-                    if (!string.IsNullOrWhiteSpace(param.MaterialName) || !string.IsNullOrWhiteSpace(param.MaterialName) || !string.IsNullOrWhiteSpace(param.MaterialNo) || !string.IsNullOrWhiteSpace(param.MaterialNo))
-                    {
-                        material = $"{param.MaterialNo}/{param.MaterialName}";
-                    }
-                    string length = param.Length;
-                    if (string.IsNullOrWhiteSpace(length) || !string.IsNullOrWhiteSpace(length))
-                    {
-                        length = param.ProfileLength;
-                    }
-                    string comment = "";
-                    if ((!string.IsNullOrWhiteSpace(param.Comment) || !string.IsNullOrWhiteSpace(param.Comment)) && (!string.IsNullOrWhiteSpace(param.Info) || !string.IsNullOrWhiteSpace(param.Info)))
-                    {
-                        comment = $"{param.Comment} / {param.Info}";
-                    }
-                    else if ((!string.IsNullOrWhiteSpace(param.Comment) || !string.IsNullOrWhiteSpace(param.Comment)) && (string.IsNullOrWhiteSpace(param.Info) || string.IsNullOrWhiteSpace(param.Info)))
-                    {
-                        comment = $"{param.Comment}";
-                    }
-                    else if(string.IsNullOrWhiteSpace(param.Comment) || string.IsNullOrWhiteSpace(param.Comment))
-                    {
-                        comment = "";
-                    }
-
-                    dataGridView1.Rows.Add(
-                        param.ItemNo,
-                        $"{param.Quantity}x",
-                        param.Name,
-                        param.Supplier,
-                        param.OrderNo,
-                        param.TypeNo,
-                        param.CustomerOrderNo,
-                        material,
-                        param.Dimensions,
-                        length,
-                        sparePart,
-                        comment,
-                        param.ChildPath
-                    );
-                }
                 SetRowNumber(dataGridView1);
 
                 // Karşılaştırma
                 ComparisonHelper comparisonHelper = new();
-                comparisonHelper.CompareCatiaAndBom(dict, bomItems, dataGridView1, isZSBCheckBox.Checked);
+                try
+                {
+                    comparisonHelper.CompareCatiaAndBom(bomItems, dataGridView1, isZSBCheckBox.Checked);
+                }
+                catch (Exception ex)
+                {
+                    InformationLabel.ForeColor = Color.Red;
+                    InformationLabel.Text = ex.Message;
+                }
             }
         }
         #endregion
