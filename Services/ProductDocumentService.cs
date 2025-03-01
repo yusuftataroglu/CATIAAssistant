@@ -1,5 +1,6 @@
 ﻿using CATIAAssistant.Models;
 using KnowledgewareTypeLib;
+using Microsoft.Office.Interop.Excel;
 using ProductStructureTypeLib;
 
 namespace CATIAAssistant.Services
@@ -98,10 +99,12 @@ namespace CATIAAssistant.Services
             string painting = "";
             string mirrored = "";
             string key = childPath;
-
+            Product childRefProduct = child.ReferenceProduct;
+            KnowledgewareTypeLib.Parameters childRefProductParameters = childRefProduct.UserRefProperties;
+            
             try
             {
-                name = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\NAME").ValueAsString().Trim();
+                name = childRefProductParameters.Item("NAME").ValueAsString().Trim();
                 if (name == "SKELETON" || name == "FIX" || name == "MOVABLE" || name == "OPENED CONDITION")
                     return true;
             }
@@ -111,7 +114,7 @@ namespace CATIAAssistant.Services
             bool isChecked = false;
             try
             {
-                itemNo = child.Parameters.Item($"{child.get_PartNumber()}\\Properties\\ITEM_NO").ValueAsString().Trim();
+                itemNo = childRefProductParameters.Item("ITEM_NO").ValueAsString().Trim();
             }
             catch (Exception)
             {
@@ -135,23 +138,23 @@ namespace CATIAAssistant.Services
 
             try
             {
-                Parameters childParameters = child.Parameters;
-                supplier = childParameters.Item($"{child.get_PartNumber()}\\Properties\\SUPPLIER").ValueAsString().Trim();
-                orderNo = childParameters.Item($"{child.get_PartNumber()}\\Properties\\ITEM_NO_LH").ValueAsString().Trim();
-                typeNo = childParameters.Item($"{child.get_PartNumber()}\\Properties\\TYPE_TITLE_LH").ValueAsString().Trim();
-                customerOrderNo = childParameters.Item($"{child.get_PartNumber()}\\Properties\\DRAWING_NO").ValueAsString().Trim();
-                materialName = childParameters.Item($"{child.get_PartNumber()}\\Properties\\MATERIAL_NAME").ValueAsString().Trim();
-                materialNo = childParameters.Item($"{child.get_PartNumber()}\\Properties\\MATERIAL_NO").ValueAsString().Trim();
-                dimensions = childParameters.Item($"{child.get_PartNumber()}\\Properties\\STOCK_DIM").ValueAsString().Trim();
-                width = childParameters.Item($"{child.get_PartNumber()}\\Properties\\WIDTH").ValueAsString().Trim();
-                length = childParameters.Item($"{child.get_PartNumber()}\\Properties\\LENGTH").ValueAsString().Trim();
-                profileLength = childParameters.Item($"{child.get_PartNumber()}\\Properties\\PROFILE_LENGTH").ValueAsString().Trim();
-                sparePart = childParameters.Item($"{child.get_PartNumber()}\\Properties\\SPARE_WEAR_PART").ValueAsString().Trim();
-                comment = childParameters.Item($"{child.get_PartNumber()}\\Properties\\COMMENT").ValueAsString().Trim();
-                info = childParameters.Item($"{child.get_PartNumber()}\\Properties\\ADD_INFO").ValueAsString().Trim();
-                heatTreatment = childParameters.Item($"{child.get_PartNumber()}\\Properties\\HEAT_TREATMENT").ValueAsString().Trim();
-                painting = childParameters.Item($"{child.get_PartNumber()}\\Properties\\PAINTING").ValueAsString().Trim();
-                mirrored = childParameters.Item($"{child.get_PartNumber()}\\Properties\\MIRRORED").ValueAsString().Trim();
+
+                supplier = childRefProductParameters.Item("SUPPLIER").ValueAsString().Trim();
+                orderNo = childRefProductParameters.Item("ITEM_NO_LH").ValueAsString().Trim();
+                typeNo = childRefProductParameters.Item("TYPE_TITLE_LH").ValueAsString().Trim();
+                customerOrderNo = childRefProductParameters.Item("DRAWING_NO").ValueAsString().Trim();
+                materialName = childRefProductParameters.Item("MATERIAL_NAME").ValueAsString().Trim();
+                materialNo = childRefProductParameters.Item("MATERIAL_NO").ValueAsString().Trim();
+                dimensions = childRefProductParameters.Item("STOCK_DIM").ValueAsString().Trim();
+                width = childRefProductParameters.Item("WIDTH").ValueAsString().Trim();
+                length = childRefProductParameters.Item("LENGTH").ValueAsString().Trim();
+                profileLength = childRefProductParameters.Item("PROFILE_LENGTH").ValueAsString().Trim();
+                sparePart = childRefProductParameters.Item("SPARE_WEAR_PART").ValueAsString().Trim();
+                comment = childRefProductParameters.Item("COMMENT").ValueAsString().Trim();
+                info = childRefProductParameters.Item("ADD_INFO").ValueAsString().Trim();
+                heatTreatment = childRefProductParameters.Item("HEAT_TREATMENT").ValueAsString().Trim();
+                painting = childRefProductParameters.Item("PAINTING").ValueAsString().Trim();
+                mirrored = childRefProductParameters.Item("MIRRORED").ValueAsString().Trim();
             }
             catch (Exception)
             {
