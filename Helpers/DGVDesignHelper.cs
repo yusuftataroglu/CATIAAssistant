@@ -89,8 +89,8 @@ namespace CATIAAssistant.Helpers
                 dataGridView1.Rows.Add(
                     param.ItemNo,
                     "0",
-                    $"{drawn}x",
-                    $"{mirror}x",
+                    $"{drawn}",
+                    $"{mirror}",
                     param.Name,
                     param.Supplier,
                     param.OrderNo,

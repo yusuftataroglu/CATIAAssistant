@@ -1,4 +1,6 @@
-﻿namespace CATIAAssistant.Helpers
+﻿using PARTITF;
+
+namespace CATIAAssistant.Helpers
 {
     public class ParseQuantityHelper
     {
@@ -13,8 +15,8 @@
             {
                 parts[i] = parts[i].Trim();
             }
-            int drawn = 0, mirror = 0;
 
+            int drawn = 0, mirror = 0;
             // "2x" → drawn = 2
             if (parts.Length > 0)
                 drawn = ParseQuantity(parts[0]);

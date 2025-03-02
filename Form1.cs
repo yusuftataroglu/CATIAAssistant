@@ -404,31 +404,33 @@ namespace CATIAAssistant
         {
             int totalDrawn = 0;
             int totalMirror = 0;
-
-            // Bir HashSet ile satır indekslerini saklayacağız
-            HashSet<int> selectedRowIndices = new HashSet<int>();
+            HashSet<int> selectedRows = new HashSet<int>();
 
             foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
             {
+                selectedRows.Add(cell.RowIndex);
+
                 if (cell.Value is string cellValue)
                 {
-                    // Quantity toplama mantığı
-                    var (drawn, mirror) = new ParseQuantityHelper().ParseDrawnMirror(cellValue);
-                    totalDrawn += drawn;
-                    totalMirror += mirror;
+                    // Ayırt et: "2x/3x" mi, yoksa "2" (veya "2x") mi?
+                    if (cellValue.Contains("/"))
+                    {
+                        // Eski mantık: "2x/3x"
+                        var (drawn, mirror) = new ParseQuantityHelper().ParseDrawnMirror(cellValue);
+                        totalDrawn += drawn;
+                        totalMirror += mirror;
+                    }
+                    else
+                    {
+                        if (cell.OwningColumn.Name.Equals("Drawn", StringComparison.OrdinalIgnoreCase))
+                            totalDrawn += int.Parse(cellValue);
+                        else if (cell.OwningColumn.Name.Equals("Mirror", StringComparison.OrdinalIgnoreCase))
+                            totalMirror += int.Parse(cellValue);
+                    }
                 }
-
-                // Satır indeksini ekliyoruz
-                selectedRowIndices.Add(cell.RowIndex);
             }
-
-            // Seçilen satır sayısı, HashSet'in eleman sayısı
-            int rowCount = selectedRowIndices.Count;
-
-            // InformationLabel’da hem seçilen satır sayısını hem sum değerini gösteriyoruz
-            InformationLabel.Text = $"Number: {rowCount}   Sum: {totalDrawn}x/{totalMirror}x";
+            InformationLabel.Text = $"Number: {selectedRows.Count}  Sum: {totalDrawn}x/{totalMirror}x";
         }
-
         #endregion
         #region Other UI Handlers
         private void checkBoxAlwaysOnTop_CheckedChanged(object sender, EventArgs e)
