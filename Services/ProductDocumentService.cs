@@ -99,9 +99,19 @@ namespace CATIAAssistant.Services
             string painting = "";
             string mirrored = "";
             string key = childPath;
-            Product childRefProduct = child.ReferenceProduct;
-            KnowledgewareTypeLib.Parameters childRefProductParameters = childRefProduct.UserRefProperties;
-            
+            Product childRefProduct;
+            KnowledgewareTypeLib.Parameters childRefProductParameters;
+
+            try
+            {
+                childRefProduct = child.ReferenceProduct;
+                 childRefProductParameters = childRefProduct.UserRefProperties;
+            }
+            catch (Exception)
+            {
+                childRefProduct = child;
+                childRefProductParameters = childRefProduct.Parameters;
+            }
             try
             {
                 name = childRefProductParameters.Item("NAME").ValueAsString().Trim();
