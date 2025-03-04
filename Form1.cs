@@ -413,7 +413,7 @@ namespace CATIAAssistant
                 if (cell.Value is string cellValue)
                 {
                     // Ayırt et: "2x/3x" mi, yoksa "2" (veya "2x") mi?
-                    if (cellValue.Contains("/"))
+                    if (cellValue.Contains("x",StringComparison.OrdinalIgnoreCase))
                     {
                         // Eski mantık: "2x/3x"
                         var (drawn, mirror) = new ParseQuantityHelper().ParseDrawnMirror(cellValue);
