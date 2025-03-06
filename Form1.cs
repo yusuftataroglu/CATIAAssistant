@@ -379,8 +379,11 @@ namespace CATIAAssistant
                 }
                 catch (Exception ex)
                 {
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Columns.Clear();
                     InformationLabel.ForeColor = Color.Red;
                     InformationLabel.Text = ex.Message;
+                    return;
                 }
             }
         }

@@ -277,7 +277,7 @@
             Controls.Add(statusStrip2);
             Name = "Form1";
             SizeGripStyle = SizeGripStyle.Show;
-            Text = "Form1";
+            Text = "Catia Assistant";
             TopMost = true;
             Load += Form1_Load;
             statusStrip1.ResumeLayout(false);

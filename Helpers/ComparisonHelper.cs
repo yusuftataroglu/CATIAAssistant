@@ -7,11 +7,13 @@ namespace CATIAAssistant.Helpers
     {
         public void CompareCatiaAndBom(List<BomItem> bomItems, DataGridView dataGridView1, bool isZSB)
         {
-            Dictionary<string, BomItem> bomDict = bomItems.ToDictionary(x => x.ItemNo);
 
-            foreach (DataGridViewRow row in dataGridView1.Rows)
+
+            if (!isZSB)
             {
-                if (!isZSB)
+                Dictionary<string, BomItem> bomDictForNonZSBProducts = bomItems.ToDictionary(x => x.ItemNo);
+
+                foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
                     string itemNo = "";
                     do
@@ -20,7 +22,7 @@ namespace CATIAAssistant.Helpers
                     }
                     while (itemNo.StartsWith('0'));
 
-                    if (!bomDict.TryGetValue(itemNo, out var bomItem))
+                    if (!bomDictForNonZSBProducts.TryGetValue(itemNo, out var bomItem))
                     {
                         // Bom'da yok, satırı sarıya boya.
                         row.DefaultCellStyle.BackColor = Color.Yellow;
@@ -127,13 +129,16 @@ namespace CATIAAssistant.Helpers
 
                     }
                 }
-                else
-                {
-                    Dictionary<string, BomItem> bomDict = bomDict = bomItems.ToDictionary(x => x.CustomerOrderNo);
+            }
+            else
+            {
+                Dictionary<string, BomItem> bomDictForZSBProducts = bomItems.ToDictionary(x => x.CustomerOrderNo);
 
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
                     string customerOrderNo = row.Cells["CustomerOrderNo"].Value?.ToString();
 
-                    if (!bomDict.TryGetValue(customerOrderNo, out var bomItem))
+                    if (!bomDictForZSBProducts.TryGetValue(customerOrderNo, out var bomItem))
                     {
                         // Bom'da yok, satırı sarıya boya.
                         row.DefaultCellStyle.BackColor = Color.Yellow;
@@ -234,7 +239,6 @@ namespace CATIAAssistant.Helpers
                     }
                 }
             }
-
         }
     }
 }
