@@ -1,5 +1,4 @@
 ﻿using CATIAAssistant.Models;
-using Microsoft.VisualBasic;
 
 namespace CATIAAssistant.Helpers
 {

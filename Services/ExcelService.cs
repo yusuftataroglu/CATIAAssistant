@@ -94,21 +94,6 @@ namespace Catia_Macro_Test.Services
                     });
                 }
             }
-            try
-            {
-                if (isZSB)
-                {
-                    Dictionary<string, BomItem> dict = bomItems.ToDictionary(x => x.CustomerOrderNo);
-                }
-                else
-                {
-                    Dictionary<string, BomItem> dict = bomItems.ToDictionary(x => x.ItemNo);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
             return bomItems;
         }
 

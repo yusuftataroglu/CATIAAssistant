@@ -7,14 +7,12 @@ namespace CATIAAssistant.Helpers
     {
         public void CompareCatiaAndBom(List<BomItem> bomItems, DataGridView dataGridView1, bool isZSB)
         {
-
+            Dictionary<string, BomItem> bomDict = bomItems.ToDictionary(x => x.ItemNo);
 
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 if (!isZSB)
                 {
-                    Dictionary<string, BomItem> bomDict = bomItems.ToDictionary(x => x.ItemNo);
-
                     string itemNo = "";
                     do
                     {
